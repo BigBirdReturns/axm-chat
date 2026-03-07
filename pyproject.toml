@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "axm-chat"
+version = "0.1.0"
+description = "AXM chat spoke — turn conversation exports into queryable knowledge shards"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+dependencies = [
+  "axm-genesis>=1.2.0",
+  "click>=8.0.0",
+  "duckdb>=0.9.0",
+]
+
+[project.optional-dependencies]
+server = [
+  "flask>=3.0.0",
+  "flask-cors>=4.0.0",
+]
+dev = [
+  "pytest>=7.0",
+  "ruff>=0.1.0",
+]
+
+[project.scripts]
+axm-chat = "axm_chat.cli:main"
+
+[project.entry-points."axm.spokes"]
+chat = "axm_chat.cli:chat_group"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
