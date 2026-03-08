@@ -10,12 +10,33 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
 dependencies = [
+  # ── Protocol kernel ────────────────────────────────────────────────────────
   "axm-genesis>=1.2.0",
+
+  # ── Query runtime ──────────────────────────────────────────────────────────
+  # `axm-chat query` calls axiom_runtime.engine (SpectraEngine) and
+  # axiom_runtime.nlquery (natural_language_to_sql).  Both live in axm-core.
+  # Declaring this dependency makes the install contract honest: if you want
+  # `axm-chat query` to work, axm-core must be installed.
+  #
+  # Import / distill / verify work without this if axm-core is absent —
+  # the cli falls back to inline DuckDB — but the full query experience
+  # (natural language, union views, lineage, contradictions) requires Core.
+  "axm-core @ git+https://github.com/BigBirdReturns/axm-core.git@v1.1.0",
+
+  # ── CLI + storage ─────────────────────────────────────────────────────────
   "click>=8.0.0",
   "duckdb>=0.9.0",
 ]
 
 [project.optional-dependencies]
+# Install axm-chat without axm-core — import and distill work, query degrades
+# to inline DuckDB with no NL support.
+minimal = [
+  "axm-genesis>=1.2.0",
+  "click>=8.0.0",
+  "duckdb>=0.9.0",
+]
 server = [
   "flask>=3.0.0",
   "flask-cors>=4.0.0",
@@ -25,12 +46,18 @@ dev = [
   "ruff>=0.1.0",
 ]
 
+# ── Entry points ──────────────────────────────────────────────────────────────
+
+# Direct command — works standalone, before `axm` host is installed.
 [project.scripts]
 axm-chat = "axm_chat.cli:main"
 
+# Plugin registration — axm-core's CLI host discovers this on startup.
+# When the user runs `axm chat import`, core loads this group automatically.
 [project.entry-points."axm.spokes"]
 chat = "axm_chat.cli:chat_group"
 
+# ── Package discovery ─────────────────────────────────────────────────────────
 [tool.setuptools]
 package-dir = {"" = "src"}
 
