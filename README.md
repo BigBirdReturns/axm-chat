@@ -89,16 +89,40 @@ Supported query patterns:
 
 Raw SQL also works: `axm-chat query --sql "SELECT * FROM claims WHERE predicate='decided'"`
 
-## Web UI
+## Glass Onion UI
 
-A React interface and Flask server are included.
+The chat spoke includes a Glass Onion interface — a visual shell that maps AXM's architecture layers to navigable modes.
+
+**Demo mode (no server):** Open `ui/axm_chat_glass_onion.jsx` in any React sandbox (Claude artifact viewer, CodeSandbox, Vite dev server). It auto-detects that no server is running and shows simulated data. You can click through Import → Distill → Query to see the full workflow.
+
+**Live mode (with server):** Start the local server, and the Glass Onion auto-detects it on load — no configuration, no editing source files.
 
 ```bash
-pip install -e ".[server]"
-python server/axm_server.py       # runs on http://localhost:8410
+pip install -e ".[server]"    # adds Flask + flask-cors
+python server/axm_server.py   # starts on http://localhost:8410
 ```
 
-Then open `ui/axm_chat_ui.jsx` in a React app pointed at `localhost:8410`, or serve it however you like.
+The Glass Onion checks `localhost:8410/health` every 10 seconds. When the server is up, it switches to live mode automatically. When the server goes down, it falls back to demo mode. The status indicator in the header shows `connected` / `demo` / `offline`.
+
+**Modes:**
+- **Import** (spoke ring) — drag and drop Claude/ChatGPT export files, watch shards compile in real time
+- **Distill** (core ring) — select a conversation shard, run decision extraction via Ollama, see results
+- **Query** (kernel) — type natural language questions, get structured results with the SQL shown
+
+The Glass Onion pattern is shared across AXM spokes. The drone show spoke (`axm-show`) has its own Glass Onion with Plan → Compile → Inspect modes. Same visual language, different domain.
+
+## Server API
+
+The Flask server (`server/axm_server.py`) exposes five endpoints:
+
+| Endpoint | Method | What it does |
+|---|---|---|
+| `/health` | GET | Liveness check, shard count, Ollama status |
+| `/shards` | GET | List all shards with metadata |
+| `/import` | POST | Multipart file upload → compile shards |
+| `/distill` | POST | Extract decisions from a shard via Ollama |
+| `/query` | POST | Natural language → SQL → results |
+| `/verify` | POST | Run axm-verify on a shard |
 
 The server has a DuckDB fallback if axm-core (Spectra) isn't installed — import and distill work without Spectra; queries degrade to inline SQL.
 
@@ -108,6 +132,7 @@ The server has a DuckDB fallback if axm-core (Spectra) isn't installed — impor
 axm-chat/
   pyproject.toml
   README.md
+  LICENSE
   src/axm_chat/
     __init__.py       public API (re-exports spoke.py for server use)
     spoke.py          export detection, extraction, compilation
@@ -116,7 +141,7 @@ axm-chat/
   server/
     axm_server.py     Flask HTTP bridge (import/distill/query/verify as REST)
   ui/
-    axm_chat_ui.jsx   React interface
+    axm_chat_glass_onion.jsx   Glass Onion interface (auto-detects server)
 ```
 
 ## Dependencies
