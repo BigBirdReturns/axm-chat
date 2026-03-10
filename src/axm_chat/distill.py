@@ -942,7 +942,109 @@ def distill_shard(
             error=f"Ollama not available at {base_url}. Start it: ollama serve",
         )
 
-    # Extract decisions
+    # ------------------------------------------------------------------
+    # Pass 1 (always): Universal episodic extraction
+    # Writes ext/episodes@1.parquet directly into the SOURCE shard.
+    # This never fails silently — if episodic extraction errors, we log
+    # and continue; the decision pass below is independent.
+    # ------------------------------------------------------------------
+    shard_timestamp = manifest.get("created_at", datetime.now(timezone.utc).isoformat())
+    _turns_for_lens = _extract_turns_from_source(source_text)
+    _batches_for_lens = _batch_turns(_turns_for_lens) if _turns_for_lens else []
+
+    try:
+        from axm_chat.episodic import (
+            extract_episodes,
+            episodes_needing_lens,
+            episodes_to_records,
+        )
+        import duckdb as _duckdb
+
+        episodes = extract_episodes(
+            source_text=source_text,
+            shard_id=shard_id,
+            shard_timestamp=shard_timestamp,
+            model=model,
+            base_url=base_url,
+        )
+
+        if episodes:
+            # Write ext/episodes@1.parquet into the source shard's ext dir
+            _ext_dir = shard_path / "ext"
+            _ext_dir.mkdir(exist_ok=True)
+            _ep_rows = episodes_to_records(episodes)
+            _ep_path = _ext_dir / "episodes@1.parquet"
+
+            _con = _duckdb.connect(":memory:")
+            _con.execute("""
+                CREATE TABLE ep (
+                    episode_id            VARCHAR,
+                    shard_id              VARCHAR,
+                    batch_index           INTEGER,
+                    timestamp             VARCHAR,
+                    topic_tags            VARCHAR[],
+                    people                VARCHAR[],
+                    animals               VARCHAR[],
+                    tools_places_services VARCHAR[],
+                    projects              VARCHAR[],
+                    question_text         VARCHAR,
+                    state                 VARCHAR,
+                    tone                  VARCHAR,
+                    summary               VARCHAR,
+                    lens_hints            VARCHAR[]
+                )
+            """)
+            for row in _ep_rows:
+                _con.execute(
+                    "INSERT INTO ep VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    [
+                        row["episode_id"], row["shard_id"], row["batch_index"],
+                        row["timestamp"], row["topic_tags"], row["people"],
+                        row["animals"], row["tools_places_services"],
+                        row["projects"], row["question_text"],
+                        row["state"], row["tone"], row["summary"],
+                        row["lens_hints"],
+                    ],
+                )
+            _con.execute(f"COPY ep TO '{_ep_path}' (FORMAT PARQUET, COMPRESSION ZSTD)")
+            _con.close()
+
+            # ------------------------------------------------------------------
+            # Pass 2 (gated): Engineering lens
+            # Only runs on episodes where lens_hints ∋ "engineering".
+            # If this fails, Pass 1 artifact is already written and safe.
+            # ------------------------------------------------------------------
+            _eng_targets = episodes_needing_lens(episodes, "engineering")
+            if _eng_targets and _batches_for_lens:
+                try:
+                    from axm_chat.engineering_lens import (
+                        run_engineering_lens,
+                        write_engineering_parquet,
+                    )
+                    _eng_records = run_engineering_lens(
+                        episodes=_eng_targets,
+                        batches=_batches_for_lens,
+                        model=model,
+                        base_url=base_url,
+                    )
+                    if _eng_records:
+                        write_engineering_parquet(_eng_records, _ext_dir)
+                except Exception as _e:
+                    # Pass 2 failure is non-fatal — episodic index is already written
+                    import logging as _logging
+                    _logging.getLogger(__name__).warning(
+                        f"Engineering lens failed for {shard_id} (non-fatal): {_e}"
+                    )
+
+    except Exception as _ep_err:
+        import logging as _logging
+        _logging.getLogger(__name__).warning(
+            f"Episodic pass failed for {shard_id} (non-fatal): {_ep_err}"
+        )
+
+    # ------------------------------------------------------------------
+    # Extract decisions (existing pass — unchanged)
+    # ------------------------------------------------------------------
     decisions = extract_decisions(
         source_text, model=model, base_url=base_url, on_progress=on_progress
     )
