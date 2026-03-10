@@ -40,9 +40,16 @@ from flask_cors import CORS
 
 HERE = Path(__file__).resolve().parent
 
-# Add this directory so axm_chat and distill can be imported
-if str(HERE) not in sys.path:
-    sys.path.insert(0, str(HERE))
+# Add axm-chat/src/ so axm_chat package is importable in bare-checkout runs.
+# When installed via `pip install -e .` this is a no-op — already on the path.
+for _src_candidate in [
+    HERE.parent / "src",          # server/ -> axm-chat/src/
+    HERE / "src",                 # if server/ == axm-chat/
+]:
+    if (_src_candidate / "axm_chat").exists():
+        if str(_src_candidate) not in sys.path:
+            sys.path.insert(0, str(_src_candidate))
+        break
 
 # Try to find axm-genesis
 for candidate in [
@@ -157,7 +164,7 @@ def list_shards():
 @app.route("/import", methods=["POST"])
 def import_files():
     """Import uploaded export files."""
-    from axm_chat import load_export_file, extract_conversation, compile_conversation_shard
+    from axm_chat import load_export_file, extract_conversation, compile_conversation_shard, get_or_create_keypair
 
     files = request.files.getlist("files")
     if not files:
@@ -182,7 +189,7 @@ def import_files():
             convs, export_type = load_export_file(save_path)
             log.append(f"→ {upload.filename}: {len(convs)} conversations ({export_type})")
 
-            from axm_chat import _get_or_create_keypair, SUITE
+            from axm_chat import SUITE
             import re
 
             for idx, conv in enumerate(convs):
@@ -252,7 +259,7 @@ def distill():
             return jsonify({"error": f"Shard not found: {shard_name}"}), 404
 
     try:
-        from distill import distill_shard
+        from axm_chat.distill import distill_shard
 
         result = distill_shard(
             shard_path=shard_path,
@@ -335,14 +342,15 @@ def query():
 def _fallback_query(question: str):
     """Fallback query using DuckDB directly when Spectra isn't available.
 
-    Does NOT import from axiom_runtime — unavailable in fallback mode by definition.
-    Uses an inline NL→SQL translator instead.
+    Does NOT import from axiom_runtime — that package is unavailable in
+    fallback mode by definition. Uses an inline NL→SQL translator instead.
     """
     try:
         import duckdb
     except ImportError:
         return jsonify({"error": "duckdb not installed: pip install duckdb"}), 500
 
+    # Inline NL→SQL — covers the most common query shapes without axiom_runtime.
     import re as _re
     q = question.lower().strip()
     DECISION_PREDS = (
@@ -384,6 +392,8 @@ def _fallback_query(question: str):
 
     # Mount claims from all shards
     unions = []
+    ep_unions  = []
+    eng_unions = []
     for i, sp in enumerate(shard_paths):
         claims_p = sp / "graph" / "claims.parquet"
         if claims_p.exists():
@@ -400,8 +410,26 @@ def _fallback_query(question: str):
         if lin_p.exists():
             con.execute(f"CREATE VIEW l{i} AS SELECT * FROM read_parquet('{lin_p}')")
 
+        # Mount episodic index if exists
+        ep_p = sp / "ext" / "episodes@1.parquet"
+        if ep_p.exists():
+            con.execute(f"CREATE VIEW ep{i} AS SELECT * FROM read_parquet('{ep_p}')")
+            ep_unions.append(f"SELECT * FROM ep{i}")
+
+        # Mount engineering lens if exists
+        eng_p = sp / "ext" / "engineering@1.parquet"
+        if eng_p.exists():
+            con.execute(f"CREATE VIEW eng{i} AS SELECT * FROM read_parquet('{eng_p}')")
+            eng_unions.append(f"SELECT * FROM eng{i}")
+
     if unions:
         con.execute(f"CREATE VIEW claims AS {' UNION ALL '.join(unions)}")
+
+    if ep_unions:
+        con.execute(f"CREATE VIEW episodes AS {' UNION ALL '.join(ep_unions)}")
+
+    if eng_unions:
+        con.execute(f"CREATE VIEW engineering AS {' UNION ALL '.join(eng_unions)}")
 
     # Create temporal/lineage unions if any exist
     temp_views = [f"SELECT * FROM t{i}" for i in range(len(shard_paths))
@@ -464,6 +492,6 @@ if __name__ == "__main__":
     print(f"  Port:      {PORT}")
     print(f"  Shards:    {SHARD_DIR}")
     print(f"  Ollama:    {'✓' if _check_ollama() else '✗ (needed for distill)'}")
-    print(f"  UI:        Open axm_chat_ui.jsx in Claude artifact viewer")
+    print(f"  UI:        http://localhost:{PORT}  (or open index.html)")
     print()
     app.run(host="0.0.0.0", port=PORT, debug=False)
