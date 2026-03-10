@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AXM — Your AI conversations as sovereign knowledge</title>
+  <meta name="description" content="Turn Claude, ChatGPT, and Gemini exports into cryptographically signed, queryable knowledge shards. No cloud. No API keys. Your laptop." />
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display:ital@0;1&family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #1a1410;
+      --ink-mid:    #3a3020;
+      --ink-dim:    #6a5e50;
+      --ink-faint:  #9a8870;
+      --paper:      #f5f0e8;
+      --paper-warm: #ede8dc;
+      --paper-deep: #e0d8cc;
+      --gold:       #8a6a10;
+      --gold-mid:   #b8960a;
+      --gold-bright:#c8a84b;
+      --rule:       rgba(26,20,16,0.12);
+      --code-bg:    #ebe5d8;
+      --code-text:  #1a1410;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .page { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+
+    /* ── HEADER ── */
+    header { padding: 48px 0 0; border-bottom: 1px solid var(--rule); }
+    .header-inner { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 20px; }
+    .wordmark { font-family: 'Spectral', serif; font-size: 13px; font-weight: 300; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mid); }
+    .wordmark strong { font-weight: 600; color: var(--ink); }
+    nav { display: flex; gap: 32px; }
+    nav a { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); text-decoration: none; transition: color 0.15s; }
+    nav a:hover { color: var(--gold); }
+
+    /* ── HERO ── */
+    .hero { padding: 88px 0 104px; display: flex; flex-direction: column; gap: 24px; text-align: center; align-items: center; }
+    .kicker { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+    h1 { font-family: 'Spectral', serif; font-size: clamp(42px, 6vw, 68px); font-weight: 300; line-height: 1.1; color: var(--ink); letter-spacing: -0.02em; max-width: 800px; }
+    h1 em { font-style: italic; color: var(--ink-mid); }
+    .hero-body { font-size: 20px; color: var(--ink-dim); max-width: 580px; margin: 16px 0 32px; line-height: 1.5; }
+    .hero-actions { display: flex; gap: 16px; align-items: center; }
+    .btn-primary { display: inline-block; padding: 14px 32px; background: var(--ink); color: var(--paper); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border: none; cursor: pointer; transition: background 0.15s; border-radius: 2px; }
+    .btn-primary:hover { background: var(--ink-mid); }
+    .btn-ghost { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; transition: color 0.15s, border-color 0.15s; }
+    .btn-ghost:hover { color: var(--gold); border-color: var(--gold-bright); }
+
+    /* ── SECTIONS ── */
+    .rule-section { border-top: 1px solid var(--rule); padding: 88px 0; }
+    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 48px; }
+    .section-label span { margin-right: 16px; color: var(--ink-faint); }
+
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .problem-text h2 { font-family: 'Spectral', serif; font-size: 32px; font-weight: 300; color: var(--ink); margin-bottom: 24px; line-height: 1.2; }
+    .problem-text p { color: var(--ink-dim); margin-bottom: 24px; }
+    .thesis-box { padding: 24px; border-left: 3px solid var(--gold); background: var(--paper-warm); font-style: italic; color: var(--ink-mid); font-size: 17px; line-height: 1.6; }
+
+    /* ── PIPELINE & REACT DEMO ── */
+    .pipeline-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-bottom: none; }
+    .pipeline-step { background: var(--paper); padding: 36px 32px; cursor: pointer; transition: background 0.2s; position: relative; }
+    .pipeline-step:hover { background: var(--paper-warm); }
+    .pipeline-step.active { background: var(--paper-deep); }
+    .pipeline-step.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
+    .step-num { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--gold); margin-bottom: 12px; }
+    .step-title { font-family: 'Spectral', serif; font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
+    .step-body { font-size: 15px; color: var(--ink-dim); line-height: 1.65; }
+
+    .app-layout { display: flex; min-height: 540px; border: 1px solid var(--rule); background: var(--paper); box-shadow: 0 8px 36px rgba(26,20,16,0.06); align-items: stretch; }
+    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--paper); overflow: hidden; }
+    .app-scroll-area { flex: 1; overflow-y: auto; padding: 32px; }
+    .app-sidebar { width: 340px; flex-shrink: 0; border-left: 1px solid var(--rule); background: var(--paper-warm); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+
+    @keyframes appFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .app-fade { animation: appFadeIn 0.2s ease-out both; }
+    .svg-arc-text { transition: opacity 0.3s; }
+
+    /* ── PRIMITIVES & INSTALL ── */
+    .specs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .spec-card { border-top: 2px solid var(--ink); padding-top: 20px; }
+    .spec-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink); text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
+    .spec-desc { font-size: 14px; color: var(--ink-dim); line-height: 1.6; }
+
+    .install-block { background: var(--code-bg); border-radius: 4px; padding: 32px 36px; margin-bottom: 20px; overflow-x: auto; border: 1px solid var(--rule); }
+    pre { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.9; color: var(--code-text); }
+    .comment { color: var(--ink-faint); font-style: italic; }
+    .cmd { color: var(--ink); font-weight: 500; cursor: pointer; }
+    .str { color: var(--gold); }
+    .install-note { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-dim); line-height: 1.8; }
+    .install-note code { background: var(--code-bg); padding: 1px 5px; border-radius: 2px; font-size: 10px; border: 1px solid var(--rule); }
+
+    footer { border-top: 1px solid var(--rule); padding: 40px 0 48px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-left { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--ink-faint); }
+    .footer-right { font-family: 'Spectral', serif; font-size: 13px; font-style: italic; color: var(--ink-faint); }
+    .footer-links { display: flex; gap: 24px; margin-top: 8px; }
+    .footer-links a { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--ink-faint); text-decoration: none; transition: color 0.15s; }
+    .footer-links a:hover { color: var(--gold); }
+
+    @media (max-width: 900px) {
+      .problem-grid { grid-template-columns: 1fr; gap: 40px; }
+      .pipeline-nav { grid-template-columns: 1fr; border-bottom: 1px solid var(--rule); }
+      .app-layout { flex-direction: column-reverse; min-height: auto; border-top: none; }
+      .app-sidebar { width: 100%; border-left: none; border-bottom: 1px solid var(--rule); padding: 24px 16px; flex-direction: row; justify-content: space-around; }
+      .app-sidebar svg { max-width: 180px !important; }
+      .svg-arc-text { display: none; }
+      .specs-grid { grid-template-columns: repeat(2, 1fr); }
+      .page { padding: 0 24px; }
+    }
+    @media (max-width: 540px) {
+      .specs-grid { grid-template-columns: 1fr; }
+      .page { padding: 0 16px; }
+      h1 { font-size: 32px !important; }
+      .app-scroll-area { padding: 20px 16px; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="header-inner">
+      <div class="wordmark"><strong>AXM</strong> &thinsp;·&thinsp; Axiom</div>
+      <nav>
+        <a href="#how">How it works</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/BigBirdReturns/axm-genesis" target="_blank">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="kicker">axm-genesis v1.2.0 &nbsp;·&nbsp; axm-chat v0.1.0 &nbsp;·&nbsp; Apache 2.0</div>
+    <h1>Your AI conversations<br />as <em>sovereign knowledge</em></h1>
+    <p class="hero-body">
+      Turn Claude, ChatGPT, and Gemini exports into cryptographically signed, offline-queryable knowledge shards. Your data. Your keys. Your machine.
+    </p>
+    <div class="hero-actions">
+      <a href="#install" class="btn-primary">Run it locally</a>
+      <a href="#how" class="btn-ghost">View the pipeline</a>
+    </div>
+  </section>
+
+  <section class="rule-section" id="problem">
+    <div class="section-label"><span>01</span>The Context Collapse</div>
+    <div class="problem-grid">
+      <div class="problem-text">
+        <h2>Vendor APIs are memory black holes.</h2>
+        <p>You spend hours reasoning through architecture, strategic planning, and complex decisions with LLMs. That cognitive work is trapped inside fragmented chat interfaces controlled by vendors.</p>
+        <p>When you need to remember why a specific path was chosen or what alternatives were rejected, the context is gone. Search fails because the decisions were never formally committed. The data is locked in the cloud.</p>
+      </div>
+      <div class="thesis-box">
+        <strong>Vector databases are search engines. This is version control for knowledge.</strong><br><br>
+        The AXM protocol was built to verify autonomous robotics doctrine offline. <code>axm-chat</code> applies that exact same cryptographic rigidity to your personal knowledge base.
+      </div>
+    </div>
+  </section>
+
+  <section class="rule-section" id="how">
+    <div class="section-label"><span>02</span>The Pipeline</div>
+    <div id="axm-chat-app"></div>
+  </section>
+
+  <section class="rule-section">
+    <div class="section-label"><span>03</span>Shard Anatomy</div>
+
+    <div class="problem-grid" style="gap: 48px; align-items: start;">
+      <div class="problem-text">
+        <h2 style="font-size: 24px; margin-bottom: 16px;">No black boxes. Just files.</h2>
+        <p style="font-size: 15px; margin-bottom: 16px;">A "shard" is not a proprietary database. It is a standard directory. You can zip it, email it, or query it with any data science tool. The security is in the cryptography, not the storage medium.</p>
+        <p style="font-size: 15px;">Click <code>manifest.json</code> to inspect the structure. This is the exact artifact <code>axm-chat</code> produces. <code>axm-core</code> mounts these directories directly into DuckDB at query time.</p>
+      </div>
+      <div class="install-block" style="margin-bottom: 0;">
+<pre><span class="comment"># A compiled AXM conversation shard</span>
+~/.axm/shards/chat_My_Conversation_abc123/
+
+<span class="cmd" onclick="toggleManifest()">manifest.json</span>           <span class="comment"># metadata + Merkle root</span>
+content/source.txt       <span class="comment"># full transcript</span>
+graph/claims.parquet     <span class="comment"># extracted structured claims</span>
+sig/manifest.sig         <span class="comment"># ML-DSA-44 signature</span>
+ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pre>
+<pre id="manifest-example" style="display:none; margin-top:12px; border-top:1px solid var(--rule); padding-top:12px;">{
+  "spec_version": "1.0.0",
+  "shard_id": "chat_My_Conversation_abc123",
+  "shard_type": "conversation",
+  "sources": [
+    { "path": "content/source.txt", "sha256": "e3b0c44…" }
+  ],
+  "statistics": { "claims": 34 },
+  "publisher": { "name": "user", "id": "mldsa44:abc123…" },
+  "merkle_root": "blake3:9f86d08…"
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="rule-section">
+    <div class="section-label"><span>04</span>The Primitives</div>
+    <div class="specs-grid">
+      <div class="spec-card">
+        <div class="spec-title">BLAKE3 Merkle Trees</div>
+        <div class="spec-desc">Every claim and text block is hashed into a strict Merkle tree. Verify structural integrity of any shard entirely offline — no central server required.</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-title">ML-DSA-44 Signatures</div>
+        <div class="spec-desc">Post-quantum signatures (FIPS 204) ensure that once a shard is compiled, the authorship and timestamp are mathematically immutable. Ed25519 also supported.</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-title">DuckDB + Parquet</div>
+        <div class="spec-desc">Shards are stored locally as compressed Parquet files. At query time, the Spectra engine mounts them in-memory via DuckDB for instant relational analysis.</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-title">Lineage + References</div>
+        <div class="spec-desc">When a decision shard supersedes a conversation shard, <code>lineage@1</code> records the chain. <code>references@1</code> links every decision claim back to the exact conversation turns that produced it.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rule-section" id="install">
+    <div class="section-label"><span>05</span>Local Execution</div>
+    <div class="install-block">
+<pre><span class="comment"># Install the AXM stack (Python 3.10+)</span>
+<span class="cmd">pip install -e ./axm-genesis</span>    <span class="comment"># cryptographic compiler + verifier</span>
+<span class="cmd">pip install -e ./axm-core</span>       <span class="comment"># Spectra DuckDB query engine</span>
+<span class="cmd">pip install -e ./axm-chat</span>       <span class="comment"># chat spoke</span>
+
+<span class="comment"># Export your conversations, then import</span>
+<span class="cmd">axm-chat import</span> <span class="str">./conversations.json</span>
+
+<span class="comment"># Index episodes + extract decisions using a local model</span>
+<span class="cmd">ollama serve && ollama pull mistral</span>
+<span class="cmd">axm-chat distill</span>
+
+<span class="comment"># Query your sovereign data</span>
+<span class="cmd">axm-chat query</span> <span class="str">"what decisions have we made"</span>
+<span class="cmd">axm-chat query</span> <span class="str">"what changed since january"</span>
+<span class="cmd">axm-chat verify</span>                <span class="comment"># offline Merkle + signature check</span></pre>
+    </div>
+    <p class="install-note">All data stays in <code>~/.axm/shards/</code> on your machine. Verify any shard entirely offline: <code>axm-verify ./shard_dir</code></p>
+  </section>
+
+  <footer>
+    <div class="footer-left">
+      AXM &nbsp;·&nbsp; Apache 2.0 &nbsp;·&nbsp; BLAKE3 + ML-DSA-44
+      <div class="footer-links">
+        <a href="https://github.com/BigBirdReturns/axm-genesis" target="_blank">axm-genesis</a>
+        <a href="https://github.com/BigBirdReturns/axm-core" target="_blank">axm-core</a>
+        <a href="https://github.com/BigBirdReturns/axm-chat" target="_blank">axm-chat</a>
+      </div>
+    </div>
+    <div class="footer-right">your conversations · your claims · your keys</div>
+  </footer>
+
+</div>
+
+<script>
+// ─── AXM Chat Pipeline + Glass Onion ──────────────────────────────
+
+const SERVER_URL = "http://localhost:8410";
+let _backendUrl = null;
+
+const P = {
+  paper:    "#f5f0e8",
+  paperMid: "#ebe5d8",
+  paperDeep:"#d6cfc0",
+  ink:      "#1a1410",
+  inkFaint: "#6a5e50",
+  inkDim:   "#3a3020",
+  rule:     "rgba(26,20,16,0.12)",
+  gold:     "#8a6a10",
+  pass:     "#3a6030",
+  fail:     "#a03020",
+  blueLight:"#4a6aae",
+};
+
+const RING_FILL = {
+  world:"#e8e0d0", spoke:"#d4c8b4", core:"#b8a890", genesis:"#887c64", kernel:"#1a3a6e"
+};
+
+const DEMO_SHARDS = [
+  { name:"shard_a1b2c3", title:"AXM architecture — kernel design",       claims:34, is_decision:true,  verified:true  },
+  { name:"shard_d4e5f6", title:"axm-chat — spoke design conversations",  claims:22, is_decision:false, verified:true  },
+  { name:"shard_g7h8i9", title:"axm-core — Spectra query engine design",  claims:19, is_decision:false, verified:true  },
+];
+
+const DEMO_DECISIONS = [
+  { subject:"axm-genesis", predicate:"adopted",  object:"immutable cryptographic kernel pattern",    reasoning:"Separating the signing layer from orchestration lets spokes extend independently without touching trust.", decided_at:"2026-02-14" },
+  { subject:"deployment",  predicate:"rejected", object:"vendor cloud storage for shards",            reasoning:"Defeats the core invariant. Sovereign knowledge requires the owner controls the storage medium.", decided_at:"2026-02-14" },
+  { subject:"axm-chat",    predicate:"adopted",  object:"two-pass pipeline — import then distill",    reasoning:"Pass 1 requires no LLM. Separating signing from extraction means the shard is valid before any model runs.", decided_at:"2026-02-15" },
+  { subject:"query layer", predicate:"adopted",  object:"DuckDB over Parquet as the query surface",  reasoning:"Standard tooling. Any data scientist can inspect shards without the AXM stack installed.", decided_at:"2026-02-16" },
+];
+
+const DEMO_QUERY_RESULTS = {
+  "what decisions have we made": {
+    columns:["subject","predicate","object","date"],
+    rows: DEMO_DECISIONS.map(d=>[d.subject,d.predicate,d.object,d.decided_at]),
+    sql:"SELECT subject, predicate, object, decided_at\nFROM claims WHERE shard_type = 'decision'\nORDER BY decided_at DESC",
+  },
+  "timeline of choices": {
+    columns:["date","subject","predicate"],
+    rows: [...DEMO_DECISIONS].sort((a,b)=>a.decided_at.localeCompare(b.decided_at)).map(d=>[d.decided_at,d.subject,d.predicate]),
+    sql:"SELECT decided_at, subject, predicate\nFROM claims WHERE predicate IN ('adopted','rejected')\nORDER BY decided_at ASC",
+  },
+  default: {
+    columns:["subject","predicate","object"],
+    rows: DEMO_DECISIONS.slice(0,3).map(d=>[d.subject,d.predicate,d.object]),
+    sql:"SELECT subject, predicate, object FROM claims LIMIT 10",
+  },
+};
+
+function delay(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ─── Glass Onion SVG ──────────────────────────────────────────────
+function GlassOnion({ mode, shardCount }) {
+  const activeRing = { import:"spoke", distill:"core", query:"kernel" }[mode];
+  const layers = [
+    { id:"world",   r:188 }, { id:"spoke",  r:148 },
+    { id:"core",    r:108 }, { id:"genesis", r:68 }, { id:"kernel", r:34 },
+  ];
+  const pulseColor = {
+    import:"rgba(138,106,16,0.3)", distill:"rgba(58,96,48,0.25)", query:"rgba(26,58,110,0.3)"
+  };
+  const pulseR = { import:148, distill:108, query:34 };
+
+  return React.createElement("svg", {
+    viewBox:"0 0 400 400",
+    style:{ width:"100%", maxWidth:280, filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.06))" }
+  },
+    React.createElement("defs", null,
+      React.createElement("radialGradient", { id:"rg-sheen", cx:"38%", cy:"32%", r:"52%" },
+        React.createElement("stop", { offset:"0%",   stopColor:"rgba(255,255,255,0.18)" }),
+        React.createElement("stop", { offset:"100%", stopColor:"rgba(255,255,255,0)" })
+      )
+    ),
+    ...[...layers].reverse().map(l => {
+      const isActive = activeRing === l.id;
+      const dimmed   = !!mode && !isActive && l.id !== "world";
+      return React.createElement("g", {
+        key:l.id, style:{ opacity:dimmed?0.3:1, transition:"opacity 0.4s ease" }
+      },
+        React.createElement("circle", {
+          cx:200, cy:200, r:l.r,
+          fill: RING_FILL[l.id],
+          stroke: isActive ? P.gold : "rgba(26,20,16,0.08)",
+          strokeWidth: isActive ? 2 : 1,
+          style:{ transition:"all 0.4s ease" }
+        })
+      );
+    }),
+    React.createElement("circle", { cx:200, cy:200, r:188, fill:"url(#rg-sheen)", pointerEvents:"none" }),
+    React.createElement("g", { stroke:"rgba(26,20,16,0.05)", strokeWidth:1, pointerEvents:"none" },
+      React.createElement("line", { x1:200, y1:12,  x2:200, y2:165 }),
+      React.createElement("line", { x1:388, y1:200, x2:235, y2:200 }),
+      React.createElement("line", { x1:200, y1:388, x2:200, y2:235 }),
+      React.createElement("line", { x1:12,  y1:200, x2:165, y2:200 })
+    ),
+    React.createElement("g", { className:"svg-arc-text", pointerEvents:"none", fontFamily:"'DM Mono',monospace" },
+      React.createElement("path", { id:"lp-world", d:"M 18,200 A 182,182 0 0,1 382,200", fill:"none" }),
+      React.createElement("text", { fontSize:8, fill:P.inkFaint, letterSpacing:2 },
+        React.createElement("textPath", { href:"#lp-world", startOffset:"50%", textAnchor:"middle" },
+          "YOUR MACHINE · NO DATA LEAVES HERE"
+        )
+      ),
+      React.createElement("path", { id:"lp-spoke", d:"M 55,200 A 145,145 0 0,1 345,200", fill:"none" }),
+      React.createElement("text", { fontSize:8, fill:P.inkDim, letterSpacing:2 },
+        React.createElement("textPath", { href:"#lp-spoke", startOffset:"50%", textAnchor:"middle" },
+          "CHAT SPOKE · IMPORT · SIGN"
+        )
+      ),
+      React.createElement("path", { id:"lp-core", d:"M 95,200 A 105,105 0 0,1 305,200", fill:"none" }),
+      React.createElement("text", { fontSize:8, fill:"rgba(26,20,16,0.5)", letterSpacing:2 },
+        React.createElement("textPath", { href:"#lp-core", startOffset:"50%", textAnchor:"middle" },
+          "AXM-CORE · INDEX · DISTILL · SPECTRA"
+        )
+      )
+    ),
+    React.createElement("text", {
+      x:200, y:196, textAnchor:"middle",
+      fontFamily:"'DM Serif Display',serif", fontSize:10,
+      fill:"rgba(255,255,255,0.9)", letterSpacing:1, pointerEvents:"none"
+    }, shardCount > 0 ? `${shardCount} SHARDS` : "NO SHARDS"),
+    React.createElement("text", {
+      x:200, y:209, textAnchor:"middle",
+      fontFamily:"'DM Mono',monospace", fontSize:7,
+      fill:"rgba(180,200,240,0.7)", letterSpacing:1, pointerEvents:"none"
+    }, shardCount > 0 ? "verified · local" : "waiting..."),
+    mode && React.createElement("circle", {
+      cx:200, cy:200, r:pulseR[mode],
+      fill:"none", stroke:pulseColor[mode], strokeWidth:8,
+      style:{ animation:"axm-pulse 2s ease-in-out infinite" },
+      pointerEvents:"none"
+    })
+  );
+}
+
+// ─── Demo Banner ─────────────────────────────────────────────────
+function DemoBanner({ serverOk }) {
+  if (serverOk) return null;
+  return React.createElement("div", {
+    style:{
+      display:"flex", alignItems:"center", gap:10,
+      padding:"10px 14px", marginBottom:20,
+      background:P.paperDeep, border:`1px solid ${P.rule}`,
+      borderRadius:3, fontSize:12, fontFamily:"'DM Mono',monospace", color:P.inkFaint
+    }
+  },
+    React.createElement("span", { style:{color:P.gold} }, "◈"),
+    React.createElement("span", null,
+      "Demo simulation — data shown is AXM's own architecture decisions. ",
+      React.createElement("span", { style:{color:P.inkFaint} }, "Start axm-core locally to use real exports.")
+    )
+  );
+}
+
+// ─── Shared UI ────────────────────────────────────────────────────
+const inputStyle = {
+  background: P.paperMid, border:`1px solid ${P.rule}`, borderRadius:3,
+  padding:"9px 12px", color:P.ink, fontSize:13,
+  fontFamily:"'DM Mono',monospace", outline:"none", width:"100%", boxSizing:"border-box"
+};
+
+function Btn({ children, onClick, primary, disabled }) {
+  return React.createElement("button", {
+    onClick, disabled,
+    style:{
+      padding:"9px 20px",
+      background: primary ? P.gold : "transparent",
+      color: primary ? P.paper : P.inkFaint,
+      border:`1px solid ${primary ? P.gold : P.rule}`,
+      borderRadius:4, fontSize:12,
+      fontFamily:"'DM Mono',monospace", fontWeight:600,
+      cursor: disabled?"not-allowed":"pointer",
+      opacity: disabled?0.4:1, transition:"all 0.15s", letterSpacing:0.5
+    }
+  }, children);
+}
+
+// ─── Mode: Import ─────────────────────────────────────────────────
+function ImportMode({ onImported, serverOk }) {
+  const [status, setStatus] = React.useState(null);
+  const [log,    setLog]    = React.useState([]);
+  const fileRef = React.useRef(null);
+  const logRef  = React.useRef(null);
+
+  React.useEffect(()=>{ if(logRef.current) logRef.current.scrollTop=logRef.current.scrollHeight; },[log]);
+  const addLog = (msg, type="info") => setLog(p=>[...p,{msg,type,id:Date.now()+Math.random()}]);
+
+  const handleImport = React.useCallback(async () => {
+    const files = fileRef.current?.files;
+    if (!files?.length && _backendUrl) return;
+    setStatus("importing"); setLog([]);
+
+    if (!_backendUrl) {
+      addLog("── simulated run (no backend) ──");
+      await delay(200); addLog("axm-chat import ./axm_chat_conversations.json");
+      await delay(400); addLog("  ✓ shard 1/3  ·  22 claims  ·  chat_spoke_design_d4e5f6", "pass");
+      await delay(300); addLog("  ✓ shard 2/3  ·  19 claims  ·  chat_spectra_design_g7h8i9", "pass");
+      await delay(300); addLog("  ✓ shard 3/3  ·  34 claims  ·  chat_kernel_design_a1b2c3", "pass");
+      await delay(200); addLog("Signed with ML-DSA-44  ·  merkle root verified");
+      addLog("✓ 3 shards → ~/.axm/shards/", "pass");
+      setStatus("done");
+      if (onImported) onImported();
+      return;
+    }
+
+    const fd = new FormData();
+    for (let f of files) fd.append("files", f);
+    try {
+      const data = await fetch(`${_backendUrl}/import`,{method:"POST",body:fd}).then(r=>r.json());
+      setStatus("done");
+      (data.log||[]).forEach(l=>addLog(l));
+      if (onImported) onImported();
+    } catch(e) { setStatus("error"); addLog(`Error: ${e.message}`,"error"); }
+  }, [onImported]);
+
+  return React.createElement("div", { className:"app-fade", style:{display:"flex",flexDirection:"column",height:"100%"} },
+    React.createElement(DemoBanner, { serverOk }),
+    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:26,fontWeight:300,color:P.ink,marginBottom:8} }, "Import Conversations"),
+    React.createElement("p", { style:{color:P.inkDim,fontSize:14,marginBottom:24,lineHeight:1.6} },
+      "Drop your Claude or ChatGPT export. ZIP or JSON. One cryptographically signed shard per conversation."
+    ),
+    React.createElement("div", {
+      style:{border:`2px dashed ${P.rule}`,borderRadius:6,padding:"32px 20px",textAlign:"center",cursor:"pointer",marginBottom:20,background:P.paperMid,opacity:serverOk?1:0.5},
+      onClick:()=>{ if(serverOk) fileRef.current?.click(); }
+    },
+      React.createElement("input", { ref:fileRef, type:"file", multiple:true, accept:".json,.zip", style:{display:"none"}, onChange:()=>setStatus(null) }),
+      React.createElement("div", { style:{fontSize:24,marginBottom:8,color:P.inkFaint} }, "↓"),
+      React.createElement("div", { style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:P.inkFaint,marginBottom:4} },
+        serverOk
+          ? (fileRef.current?.files?.length ? `${fileRef.current.files.length} file(s) selected` : "click to select export files")
+          : "file upload requires axm-core running locally"
+      )
+    ),
+    React.createElement("div", { style:{display:"flex",gap:12,marginBottom:16} },
+      React.createElement(Btn, { primary:true, onClick:handleImport, disabled:status==="importing" },
+        status==="importing" ? "Importing…" : "Compile Shards"
+      )
+    ),
+    log.length > 0 && React.createElement("div", {
+      ref:logRef,
+      style:{padding:16,background:P.paperDeep,border:`1px solid ${P.rule}`,borderRadius:4,maxHeight:180,overflow:"auto",fontFamily:"'DM Mono',monospace",fontSize:11.5,lineHeight:1.7}
+    }, log.map(l=>React.createElement("div",{key:l.id,style:{color:l.type==="pass"?P.pass:P.inkDim}},l.msg)))
+  );
+}
+
+// ─── Mode: Distill ────────────────────────────────────────────────
+function DistillMode({ shards, onDistilled, serverOk }) {
+  const [selected,  setSelected]  = React.useState(null);
+  const [status,    setStatus]    = React.useState(null);
+  const [decisions, setDecisions] = React.useState([]);
+  const [log,       setLog]       = React.useState([]);
+  const logRef = React.useRef(null);
+
+  React.useEffect(()=>{ if(logRef.current) logRef.current.scrollTop=logRef.current.scrollHeight; },[log]);
+  const addLog = (msg,type="info") => setLog(p=>[...p,{msg,type,id:Date.now()+Math.random()}]);
+
+  const handleDistill = React.useCallback(async () => {
+    setStatus("running"); setDecisions([]); setLog([]);
+    if (!_backendUrl) {
+      addLog("axm-chat distill — demo mode");
+      await delay(200); addLog("Pass 1: indexing episodes via Ollama (Mistral)…");
+      for (let i=0; i<DEMO_DECISIONS.length; i++) {
+        await delay(350);
+        addLog(`  [${DEMO_DECISIONS[i].predicate.toUpperCase()}] ${DEMO_DECISIONS[i].subject}`, "pass");
+      }
+      await delay(300); addLog("✓ Decision shard sealed and signed", "pass");
+      setDecisions(DEMO_DECISIONS); setStatus("done"); return;
+    }
+    try {
+      const data = await fetch(`${_backendUrl}/distill`,{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({shard:selected, model:"mistral"})
+      }).then(r=>r.json());
+      setDecisions(data.decisions||[]); setStatus(data.status);
+      if (data.status==="ok" && onDistilled) onDistilled();
+    } catch(e) { setStatus("error"); addLog(`Error: ${e.message}`,"error"); }
+  }, [selected, onDistilled]);
+
+  return React.createElement("div", { className:"app-fade", style:{display:"flex",flexDirection:"column",height:"100%"} },
+    React.createElement(DemoBanner, { serverOk }),
+    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:26,fontWeight:300,color:P.ink,marginBottom:8} }, "Distill Decisions"),
+    React.createElement("p", { style:{color:P.inkDim,fontSize:14,marginBottom:24,lineHeight:1.6} },
+      "Extract structured decisions from a conversation shard using a local LLM. Produces a compact, signed decision shard."
+    ),
+    React.createElement("div", { style:{marginBottom:20} },
+      React.createElement("select", { value:selected||"", onChange:e=>setSelected(e.target.value||null), style:{...inputStyle} },
+        React.createElement("option", {value:""}, "Select a conversation shard…"),
+        ...shards.filter(s=>!s.is_decision).map((s,i)=>
+          React.createElement("option", {key:i,value:s.name}, `${s.title||s.name} (${s.claims} claims)`)
+        )
+      )
+    ),
+    React.createElement("div", { style:{display:"flex",gap:12,marginBottom:20} },
+      React.createElement(Btn, { primary:true, onClick:handleDistill, disabled:status==="running" },
+        status==="running" ? "Extracting…" : "Distill & Compile"
+      )
+    ),
+    log.length>0 && decisions.length===0 && React.createElement("div", {
+      ref:logRef,
+      style:{padding:16,background:P.paperDeep,borderRadius:4,fontFamily:"'DM Mono',monospace",fontSize:11.5,lineHeight:1.7}
+    }, log.map(l=>React.createElement("div",{key:l.id,style:{color:l.type==="pass"?P.pass:P.inkDim}},l.msg))),
+    decisions.length>0 && React.createElement("div", { style:{flex:1,overflowY:"auto"} },
+      decisions.map((d,i)=>React.createElement("div", {
+        key:i,
+        style:{padding:16,background:P.paperMid,border:`1px solid ${P.rule}`,borderRadius:4,marginBottom:12}
+      },
+        React.createElement("div", {style:{display:"flex",alignItems:"center",gap:10,marginBottom:8,flexWrap:"wrap"}},
+          React.createElement("span", {style:{padding:"2px 8px",borderRadius:3,fontSize:10,fontFamily:"'DM Mono',monospace",background:d.predicate==="adopted"?"#d6cfc0":"#e0d8cc",color:d.predicate==="adopted"?P.pass:P.fail,textTransform:"uppercase"}}, d.predicate),
+          React.createElement("span", {style:{fontFamily:"'DM Serif Display',serif",fontSize:15,color:P.ink}}, d.subject),
+          React.createElement("span", {style:{color:P.inkFaint}}, "→"),
+          React.createElement("span", {style:{fontSize:13,color:P.inkDim}}, d.object)
+        ),
+        React.createElement("div", {style:{fontSize:13,color:P.inkFaint,lineHeight:1.6}}, d.reasoning)
+      ))
+    )
+  );
+}
+
+// ─── Mode: Query ──────────────────────────────────────────────────
+function QueryMode({ serverOk }) {
+  const [q,       setQ]       = React.useState("");
+  const [res,     setRes]     = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+
+  const runQuery = React.useCallback(async query => {
+    if (!query.trim()) return;
+    setLoading(true); setRes(null);
+    await delay(!_backendUrl ? 400 : 0);
+    if (!_backendUrl) {
+      setRes(DEMO_QUERY_RESULTS[query === "what decisions have we made" ? query : "default"]);
+      setLoading(false); return;
+    }
+    try {
+      const data = await fetch(`${_backendUrl}/query`,{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({question:query})
+      }).then(r=>r.json());
+      setRes(data);
+    } catch(e) { setRes({error:e.message,columns:[],rows:[]}); }
+    finally { setLoading(false); }
+  },[]);
+
+  return React.createElement("div", { className:"app-fade", style:{display:"flex",flexDirection:"column",height:"100%"} },
+    React.createElement(DemoBanner, { serverOk }),
+    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:26,fontWeight:300,color:P.ink,marginBottom:8} }, "Query Knowledge"),
+    React.createElement("p", { style:{color:P.inkDim,fontSize:14,marginBottom:24,lineHeight:1.6} },
+      "Natural language to DuckDB SQL. Runs locally against all mounted shards. No LLM required at query time."
+    ),
+    React.createElement("div", { style:{display:"flex",gap:10,marginBottom:16} },
+      React.createElement("input", {
+        value:q, onChange:e=>setQ(e.target.value),
+        onKeyDown:e=>e.key==="Enter"&&runQuery(q),
+        placeholder:"what did we decide about…",
+        style:{...inputStyle,flex:1,fontSize:14}
+      }),
+      React.createElement(Btn, { primary:true, onClick:()=>runQuery(q), disabled:loading||!q.trim() }, loading?"…":"Ask")
+    ),
+    React.createElement("div", { style:{display:"flex",gap:8,marginBottom:24,flexWrap:"wrap"} },
+      ["what decisions have we made","timeline of choices"].map((s,i)=>
+        React.createElement("button", {
+          key:i, onClick:()=>{setQ(s);runQuery(s);},
+          style:{padding:"5px 12px",background:P.paperMid,border:`1px solid ${P.rule}`,borderRadius:16,fontSize:11,fontFamily:"'DM Mono',monospace",cursor:"pointer",color:P.inkFaint}
+        }, s)
+      )
+    ),
+    res?.sql && React.createElement("div", {
+      style:{padding:16,background:P.paperDeep,borderRadius:4,fontFamily:"'DM Mono',monospace",fontSize:11,color:P.inkDim,whiteSpace:"pre-wrap",marginBottom:16}
+    }, res.sql),
+    res?.rows?.length > 0 && React.createElement("div", { style:{overflow:"auto",border:`1px solid ${P.rule}`,borderRadius:4} },
+      React.createElement("table", { style:{width:"100%",borderCollapse:"collapse",fontFamily:"'DM Mono',monospace",fontSize:12} },
+        React.createElement("thead", null,
+          React.createElement("tr", { style:{background:P.paperDeep,borderBottom:`1px solid ${P.rule}`} },
+            res.columns.map((c,i)=>React.createElement("th",{key:i,style:{padding:"10px 14px",textAlign:"left",color:P.inkFaint,fontWeight:500,textTransform:"uppercase",fontSize:10}},c))
+          )
+        ),
+        React.createElement("tbody", null,
+          res.rows.map((r,i)=>React.createElement("tr",{key:i,style:{borderBottom:`1px solid ${P.rule}`}},
+            r.map((c,j)=>React.createElement("td",{key:j,style:{padding:"10px 14px",color:P.inkDim}},c))
+          ))
+        )
+      )
+    )
+  );
+}
+
+// ─── Root App ─────────────────────────────────────────────────────
+function AXMChatApp() {
+  const [mode,     setMode]     = React.useState(null);
+  const [shards,   setShards]   = React.useState(DEMO_SHARDS);
+  const [serverOk, setServerOk] = React.useState(false);
+
+  React.useEffect(()=>{
+    const check = async () => {
+      try {
+        const res = await fetch(`${SERVER_URL}/health`,{signal:AbortSignal.timeout(2000)});
+        if (res.ok) { _backendUrl=SERVER_URL; setServerOk(true); }
+        else { _backendUrl=null; setServerOk(false); }
+      } catch { _backendUrl=null; setServerOk(false); }
+    };
+    check();
+    const iv = setInterval(check,10000);
+    return ()=>clearInterval(iv);
+  },[]);
+
+  return React.createElement(React.Fragment, null,
+    React.createElement("style", null, `
+      @keyframes axm-pulse { 0%,100%{opacity:0.4;transform:scale(1);} 50%{opacity:0.9;transform:scale(1.04);} }
+      #axm-chat-app select option { background:${P.paper}; color:${P.ink}; }
+      #axm-chat-app ::-webkit-scrollbar { width:6px; height:6px; }
+      #axm-chat-app ::-webkit-scrollbar-track { background:transparent; }
+      #axm-chat-app ::-webkit-scrollbar-thumb { background:${P.rule}; border-radius:3px; }
+    `),
+
+    // 1. PIPELINE NAVIGATION — click to open demo
+    React.createElement("div", { className:"pipeline-nav" },
+      [
+        { m:"import",  num:"Pass 1 · No LLM",   title:"Import",  desc:"Extracts raw exports into signed shards." },
+        { m:"distill", num:"Pass 2 · Local LLM", title:"Distill", desc:"Ollama indexes episodes, extracts decisions, enriches by lens." },
+        { m:"query",   num:"Query · DuckDB",      title:"Ask",     desc:"SQL pattern matching over Parquet." },
+      ].map(step => React.createElement("div", {
+        key: step.m,
+        className: `pipeline-step ${mode === step.m ? "active" : ""}`,
+        onClick: () => setMode(mode === step.m ? null : step.m)
+      },
+        React.createElement("div", { className:"step-num" },   step.num),
+        React.createElement("div", { className:"step-title" }, step.title),
+        React.createElement("div", { className:"step-body" },  step.desc)
+      ))
+    ),
+
+    // 2. DEMO PANEL — appears when a pipeline step is clicked
+    mode && React.createElement("div", { className:"app-layout app-fade" },
+      // Left: interactive tools
+      React.createElement("div", { className:"app-main" },
+        React.createElement("div", { className:"app-scroll-area" },
+          mode === "import"  && React.createElement(ImportMode,  { onImported:()=>{}, serverOk }),
+          mode === "distill" && React.createElement(DistillMode, { shards, onDistilled:()=>{}, serverOk }),
+          mode === "query"   && React.createElement(QueryMode,   { serverOk })
+        )
+      ),
+      // Right: Glass Onion as architecture telemetry
+      React.createElement("div", { className:"app-sidebar" },
+        React.createElement(GlassOnion, { mode, shardCount:shards.length }),
+        React.createElement("div", {
+          style:{marginTop:20,textAlign:"center",fontSize:12,color:P.inkFaint,fontFamily:"'DM Mono',monospace",letterSpacing:0.5}
+        },
+          serverOk
+            ? React.createElement("span", {style:{color:P.pass}}, "● Connected to axm-core")
+            : "● Running Demo Simulation"
+        )
+      )
+    )
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("axm-chat-app"));
+root.render(React.createElement(AXMChatApp));
+</script>
+
+</body>
+</html>
