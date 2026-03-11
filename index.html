@@ -95,7 +95,7 @@
     .svg-arc-text { transition: opacity 0.3s; }
 
     /* ── PRIMITIVES & INSTALL ── */
-    .specs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .specs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .spec-card { border-top: 2px solid var(--ink); padding-top: 20px; }
     .spec-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink); text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
     .spec-desc { font-size: 14px; color: var(--ink-dim); line-height: 1.6; }
@@ -198,7 +198,9 @@
 content/source.txt       <span class="comment"># full transcript</span>
 graph/claims.parquet     <span class="comment"># extracted structured claims</span>
 sig/manifest.sig         <span class="comment"># ML-DSA-44 signature</span>
-ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pre>
+ext/episodes@1.parquet   <span class="comment"># topics · people · tools · tone · state</span>
+ext/engineering@1.parquet <span class="comment"># problem · graveyard · solution · rule</span>
+ext/lineage@1.parquet    <span class="comment"># supersession chain (decision shards)</span></pre>
 <pre id="manifest-example" style="display:none; margin-top:12px; border-top:1px solid var(--rule); padding-top:12px;">{
   "spec_version": "1.0.0",
   "shard_id": "chat_My_Conversation_abc123",
@@ -232,6 +234,14 @@ ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pr
       <div class="spec-card">
         <div class="spec-title">Lineage + References</div>
         <div class="spec-desc">When a decision shard supersedes a conversation shard, <code>lineage@1</code> records the chain. <code>references@1</code> links every decision claim back to the exact conversation turns that produced it.</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-title">Episodic Index</div>
+        <div class="spec-desc">Every conversation receives a universal base pass: topic tags, named people, tools, project references, question text, resolution state, and tone — written to <code>ext/episodes@1.parquet</code> in the source shard.</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-title">Engineering Lens</div>
+        <div class="spec-desc">A gated second pass for technical conversations. Extracts the problem statement, graveyard of failed attempts, working solution, and any architectural rule that emerged — written to <code>ext/engineering@1.parquet</code>.</div>
       </div>
     </div>
   </section>
@@ -273,7 +283,7 @@ ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pr
 
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ─── AXM Chat Pipeline + Glass Onion ──────────────────────────────
 
 const SERVER_URL = "http://localhost:8410";
@@ -694,13 +704,22 @@ function AXMChatApp() {
     // 1. PIPELINE NAVIGATION — click to open demo
     React.createElement("div", { className:"pipeline-nav" },
       [
-        { m:"import",  num:"Pass 1 · No LLM",   title:"Import",  desc:"Extracts raw exports into signed shards." },
+        { m:"import",  num:"Pass 1 · No LLM",   title:"Import",  desc:"One signed shard per conversation. BLAKE3 Merkle tree, ML-DSA-44 signature." },
         { m:"distill", num:"Pass 2 · Local LLM", title:"Distill", desc:"Ollama indexes episodes, extracts decisions, enriches by lens." },
         { m:"query",   num:"Query · DuckDB",      title:"Ask",     desc:"SQL pattern matching over Parquet." },
       ].map(step => React.createElement("div", {
         key: step.m,
         className: `pipeline-step ${mode === step.m ? "active" : ""}`,
-        onClick: () => setMode(mode === step.m ? null : step.m)
+        onClick: () => {
+          const next = mode === step.m ? null : step.m;
+          setMode(next);
+          if (next) {
+            setTimeout(() => {
+              const el = document.getElementById('pipeline-demo-panel');
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+          }
+        }
       },
         React.createElement("div", { className:"step-num" },   step.num),
         React.createElement("div", { className:"step-title" }, step.title),
@@ -709,7 +728,7 @@ function AXMChatApp() {
     ),
 
     // 2. DEMO PANEL — appears when a pipeline step is clicked
-    mode && React.createElement("div", { className:"app-layout app-fade" },
+    mode && React.createElement("div", { id:"pipeline-demo-panel", className:"app-layout app-fade" },
       // Left: interactive tools
       React.createElement("div", { className:"app-main" },
         React.createElement("div", { className:"app-scroll-area" },
