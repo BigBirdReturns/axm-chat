@@ -738,9 +738,9 @@
 content/source.txt         <span class="comment"># full transcript</span>
 graph/claims.parquet       <span class="comment"># structured claims</span>
 sig/manifest.sig           <span class="comment"># ML-DSA-44 signature</span>
-ext/episodes@1.parquet     <span class="comment"># topics · people · tools · state</span>
-ext/engineering@1.parquet  <span class="comment"># problem · graveyard · solution · rule</span>
-ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pre>
+ext/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f297829b819d969781b2c3dc82938083879786">[email&#160;protected]</a>     <span class="comment"># topics · people · tools · state</span>
+ext/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d4b1bab3bdbab1b1a6bdbab394e5faa4b5a6a5a1b1a0">[email&#160;protected]</a>  <span class="comment"># problem · graveyard · solution · rule</span>
+ext/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="294540474c484e4c69180759485b585c4c5d">[email&#160;protected]</a>      <span class="comment"># supersession chain</span></pre>
 <pre id="manifest-example" style="display:none; margin-top:16px; border-top:1px solid var(--rule-strong); padding-top:16px;">{
   "spec_version": "1.0.0",
   "shard_id": "chat_My_Conversation_abc123",
@@ -777,11 +777,11 @@ ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pr
       </div>
       <div class="spec-card">
         <div class="spec-title">Episodic Index</div>
-        <div class="spec-desc">Every conversation gets a universal base pass: topic tags, named people, tools, project references, question text, resolution state, and tone — written to <code>ext/episodes@1.parquet</code>.</div>
+        <div class="spec-desc">Every conversation gets a universal base pass: topic tags, named people, tools, project references, question text, resolution state, and tone — written to <code>ext/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95f0e5fce6faf1f0e6d5a4bbe5f4e7e4e0f0e1">[email&#160;protected]</a></code>.</div>
       </div>
       <div class="spec-card">
         <div class="spec-title">Engineering Lens</div>
-        <div class="spec-desc">A gated second pass for technical conversations. Extracts the problem statement, graveyard of failed attempts, working solution, and any architectural rule — written to <code>ext/engineering@1.parquet</code>.</div>
+        <div class="spec-desc">A gated second pass for technical conversations. Extracts the problem statement, graveyard of failed attempts, working solution, and any architectural rule — written to <code>ext/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f1949f96989f949483989f96b1c0df81908380849485">[email&#160;protected]</a></code>.</div>
       </div>
     </div>
   </section>
@@ -900,7 +900,7 @@ frame 6  blake3:p7q8r9…  ✗ rejected
 
 </div><!-- /.page -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── Scroll ──────────────────────────────────────────────────
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
@@ -1338,7 +1338,7 @@ function AXMChatApp() {
 
   const stepDesc = [
     { m:"import",  num:"Pass 1 · No LLM",    title:"Import",  desc:"One signed shard per conversation. BLAKE3 Merkle, ML-DSA-44." },
-    { m:"distill", num:"Pass 2 · Local LLM",  title:"Distill", desc:"Three passes: episodic index, lens extraction, decision shard." },
+    { m:"distill", num:"Pass 2 · Local LLM",  title:"Distill", desc:"Episodic index, lens extraction, decision shard. Import runs first — without a model — so the shard is cryptographically sealed before any LLM touches it." },
     { m:"query",   num:"Query · DuckDB",       title:"Ask",     desc:"Natural language to SQL. No LLM at query time." },
   ];
 
@@ -1393,14 +1393,13 @@ root.render(React.createElement(AXMChatApp));
 // ── Layer Onion ──────────────────────────────────────────────────
 const LAYERS = [
   {
-    id: "l1",
+    id: "l3",
     ring: "outer",
-    label: "Layer 1",
-    name: "Knowledge Shards",
-    meta: "Build-time · Immutable",
-    desc: "Compiled reference material. A document enters Forge, claims are extracted, Merkle root is computed, ML-DSA-44 signs it. The shard is sealed. It never changes. You can verify it a decade from now without this software.",
-    example: "FM 21-11 field medicine · California Family Code §2030 · your architecture conversations",
-    color: "#b8a890",
+    label: "Layer 3",
+    name: "Hot Buffer",
+    meta: "Append-only · Working memory",
+    desc: "No cryptographic overhead. Nanosecond appends. Structured JSONL records written as events occur. When the session ends — or a size or time threshold fires — the buffer is compiled into a journal shard and sealed.",
+    example: "live trace events · seal trigger on session close or every 1000 events",
   },
   {
     id: "l2",
@@ -1410,25 +1409,23 @@ const LAYERS = [
     meta: "Session-boundary · Immutable",
     desc: "Decision traces. Not what the manual says — how the manual was applied. Every query, every retrieval gate, every rejected candidate is a claim. Future queries can see both the doctrine and the history of how it was used.",
     example: "what we tried · what failed · what survived · when the rule changed",
-    color: "#887c64",
   },
   {
-    id: "l3",
+    id: "l1",
     ring: "inner",
-    label: "Layer 3",
-    name: "Hot Buffer",
-    meta: "Append-only · Working memory",
-    desc: "No cryptographic overhead. Nanosecond appends. Structured JSONL records written as events occur. When the session ends — or a size or time threshold fires — the buffer is compiled into a journal shard and sealed.",
-    example: "live trace events · seal trigger on session close or every 1000 events",
-    color: "#1a3a6e",
+    label: "Layer 1",
+    name: "Knowledge Shards",
+    meta: "Build-time · Immutable",
+    desc: "Compiled reference material. A document enters Forge, claims are extracted, Merkle root is computed, ML-DSA-44 signs it. The shard is sealed. It never changes. You can verify it a decade from now without this software.",
+    example: "FM 21-11 field medicine · California Family Code §2030 · your architecture conversations",
   },
 ];
 
 const RING_R  = { outer: 170, mid: 115, inner: 62 };
-const RING_FILL = { outer: "#d4c8b4", mid: "#b8a890", inner: "#1a3a6e" };
+const RING_FILL = { outer: "#c8bca8", mid: "#8a7c6a", inner: "#2a2018" };
 
 function LayerOnion() {
-  const [active, setActive] = React.useState("l1");
+  const [active, setActive] = React.useState("l3");
   const layer = LAYERS.find(l => l.id === active);
 
   return React.createElement("div", {
@@ -1446,32 +1443,33 @@ function LayerOnion() {
           React.createElement("stop", { offset:"100%", stopColor:"rgba(255,255,255,0)" })
         )
       ),
-      // Rings — outer to inner
+      // Rings — outer to inner (l3=Hot Buffer, l2=Journal, l1=Knowledge)
       [
-        { id:"l1", r:170, fill:"#d4c8b4" },
-        { id:"l2", r:115, fill:"#b8a890" },
-        { id:"l3", r:62,  fill:"#1a3a6e" },
+        { id:"l3", r:170, fill:"#c8bca8" },
+        { id:"l2", r:115, fill:"#8a7c6a" },
+        { id:"l1", r:62,  fill:"#2a2018" },
       ].map(ring =>
         React.createElement("circle", {
           key: ring.id,
           cx:190, cy:190, r:ring.r,
           fill: ring.fill,
-          stroke: active === ring.id ? "#8a6a10" : "rgba(26,20,16,0.08)",
-          strokeWidth: active === ring.id ? 2.5 : 1,
-          style:{ transition:"all 0.25s", opacity: active === ring.id ? 1 : (active ? 0.45 : 1), cursor:"pointer" },
+          stroke: active === ring.id ? "#c8a84b" : "rgba(26,20,16,0.10)",
+          strokeWidth: active === ring.id ? 3 : 1,
+          style:{ transition:"all 0.25s", opacity: active === ring.id ? 1 : (active ? 0.5 : 1), cursor:"pointer" },
           onClick: () => setActive(ring.id),
         })
       ),
       React.createElement("circle", { cx:190, cy:190, r:170, fill:"url(#lo-sheen)", pointerEvents:"none" }),
-      // Labels on rings
+      // Arc labels — larger, high contrast against each ring
       [
-        { id:"l1", r:145, text:"KNOWLEDGE SHARDS" },
-        { id:"l2", r:92,  text:"JOURNAL SHARDS" },
-        { id:"l3", r:40,  text:"HOT BUFFER",  fill:"rgba(200,185,160,0.9)" },
+        { id:"l3", r:145, text:"HOT BUFFER",        fill:"#1a1410", fontSize:9.5 },
+        { id:"l2", r:92,  text:"JOURNAL SHARDS",    fill:"#f0e8d8", fontSize:9   },
+        { id:"l1", r:40,  text:"KNOWLEDGE",          fill:"#c8a84b", fontSize:8   },
       ].map(lbl =>
         React.createElement("g", { key:lbl.id, pointerEvents:"none" },
           React.createElement("path", { id:`lp-${lbl.id}`, d:`M ${190-lbl.r},190 A ${lbl.r},${lbl.r} 0 0,1 ${190+lbl.r},190`, fill:"none" }),
-          React.createElement("text", { fontSize:7, fill: lbl.fill || "rgba(26,20,16,0.45)", letterSpacing:2, fontFamily:"'DM Mono',monospace" },
+          React.createElement("text", { fontSize:lbl.fontSize, fill:lbl.fill, letterSpacing:2.5,
+            fontFamily:"'DM Mono',monospace", fontWeight:"500" },
             React.createElement("textPath", { href:`#lp-${lbl.id}`, startOffset:"50%", textAnchor:"middle" }, lbl.text)
           )
         )
@@ -1479,9 +1477,9 @@ function LayerOnion() {
       // Active ring pulse
       React.createElement("circle", {
         cx:190, cy:190,
-        r: { l1:170, l2:115, l3:62 }[active],
+        r: { l3:170, l2:115, l1:62 }[active],
         fill:"none",
-        stroke:"rgba(138,106,16,0.2)",
+        stroke:"rgba(200,168,75,0.35)",
         strokeWidth:10,
         style:{ animation:"lo-pulse 2s ease-in-out infinite" },
         pointerEvents:"none",
