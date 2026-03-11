@@ -758,7 +758,7 @@ ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pr
 
   <section class="rule-section">
     <div class="section-label"><span class="n">04</span> The Primitives</div>
-    <div class="specs-grid">
+    <div class="specs-grid" style="grid-template-columns:repeat(3,1fr);">
       <div class="spec-card">
         <div class="spec-title">BLAKE3 Merkle Trees</div>
         <div class="spec-desc">Every claim and text block is hashed into a strict Merkle tree. Verify structural integrity of any shard entirely offline — no central server required.</div>
@@ -772,8 +772,16 @@ ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pr
         <div class="spec-desc">Shards are stored locally as compressed Parquet files. At query time, the Spectra engine mounts them in-memory via DuckDB for instant relational analysis.</div>
       </div>
       <div class="spec-card">
-        <div class="spec-title">Episodic + Lens</div>
-        <div class="spec-desc">Every conversation gets a universal episodic index: topics, people, tools, state, tone. Technical conversations get the engineering lens: the problem, the graveyard of failed attempts, the solution, the rule that emerged.</div>
+        <div class="spec-title">Lineage + References</div>
+        <div class="spec-desc">When a decision shard supersedes a conversation shard, <code>lineage@1</code> records the chain. <code>references@1</code> links every decision claim back to the exact conversation turns that produced it.</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-title">Episodic Index</div>
+        <div class="spec-desc">Every conversation gets a universal base pass: topic tags, named people, tools, project references, question text, resolution state, and tone — written to <code>ext/episodes@1.parquet</code>.</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-title">Engineering Lens</div>
+        <div class="spec-desc">A gated second pass for technical conversations. Extracts the problem statement, graveyard of failed attempts, working solution, and any architectural rule — written to <code>ext/engineering@1.parquet</code>.</div>
       </div>
     </div>
   </section>
@@ -815,29 +823,7 @@ ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pr
       <h2>Memory has a shape.</h2>
       <p>AXM operates across three layers that share one container format but serve different temporal purposes. The protocol does not distinguish between them — all shards are structurally identical. The distinction is semantic, enforced by convention.</p>
     </div>
-    <div class="layer-grid">
-      <div class="layer-card">
-        <div class="layer-label">Layer 1</div>
-        <div class="layer-name">Knowledge Shards</div>
-        <div class="layer-meta">Build-time · Immutable</div>
-        <p class="layer-desc">Compiled reference material. A document enters Forge, claims are extracted, Merkle root is computed, ML-DSA-44 signs it. The shard is sealed. It never changes. You can verify it a decade from now without this software.</p>
-        <div class="layer-example">FM 21-11 field medicine · California Family Code §2030 · your architecture conversations</div>
-      </div>
-      <div class="layer-card">
-        <div class="layer-label">Layer 2</div>
-        <div class="layer-name">Journal Shards</div>
-        <div class="layer-meta">Session-boundary · Immutable</div>
-        <p class="layer-desc">Decision traces. Not what the manual says — how the manual was applied. Every query, every retrieval gate, every rejected candidate is a claim. Future queries can see both the doctrine and the history of how it was used.</p>
-        <div class="layer-example">what we tried · what failed · what survived · when the rule changed</div>
-      </div>
-      <div class="layer-card">
-        <div class="layer-label">Layer 3</div>
-        <div class="layer-name">Hot Buffer</div>
-        <div class="layer-meta">Append-only · Working memory</div>
-        <p class="layer-desc">No cryptographic overhead. Nanosecond appends. Structured JSONL records written as events occur. When the session ends — or a size or time threshold fires — the buffer is compiled into a journal shard and sealed.</p>
-        <div class="layer-example">live trace events · seal trigger on session close or every 1000 events</div>
-      </div>
-    </div>
+    <div id="axm-layers-onion"></div>
   </section>
 
   <section class="rule-section" id="gold">
@@ -914,7 +900,7 @@ frame 6  blake3:p7q8r9…  ✗ rejected
 
 </div><!-- /.page -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── Scroll ──────────────────────────────────────────────────
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
@@ -1403,6 +1389,141 @@ function AXMChatApp() {
 
 const root = ReactDOM.createRoot(document.getElementById("axm-chat-app"));
 root.render(React.createElement(AXMChatApp));
+
+// ── Layer Onion ──────────────────────────────────────────────────
+const LAYERS = [
+  {
+    id: "l1",
+    ring: "outer",
+    label: "Layer 1",
+    name: "Knowledge Shards",
+    meta: "Build-time · Immutable",
+    desc: "Compiled reference material. A document enters Forge, claims are extracted, Merkle root is computed, ML-DSA-44 signs it. The shard is sealed. It never changes. You can verify it a decade from now without this software.",
+    example: "FM 21-11 field medicine · California Family Code §2030 · your architecture conversations",
+    color: "#b8a890",
+  },
+  {
+    id: "l2",
+    ring: "mid",
+    label: "Layer 2",
+    name: "Journal Shards",
+    meta: "Session-boundary · Immutable",
+    desc: "Decision traces. Not what the manual says — how the manual was applied. Every query, every retrieval gate, every rejected candidate is a claim. Future queries can see both the doctrine and the history of how it was used.",
+    example: "what we tried · what failed · what survived · when the rule changed",
+    color: "#887c64",
+  },
+  {
+    id: "l3",
+    ring: "inner",
+    label: "Layer 3",
+    name: "Hot Buffer",
+    meta: "Append-only · Working memory",
+    desc: "No cryptographic overhead. Nanosecond appends. Structured JSONL records written as events occur. When the session ends — or a size or time threshold fires — the buffer is compiled into a journal shard and sealed.",
+    example: "live trace events · seal trigger on session close or every 1000 events",
+    color: "#1a3a6e",
+  },
+];
+
+const RING_R  = { outer: 170, mid: 115, inner: 62 };
+const RING_FILL = { outer: "#d4c8b4", mid: "#b8a890", inner: "#1a3a6e" };
+
+function LayerOnion() {
+  const [active, setActive] = React.useState("l1");
+  const layer = LAYERS.find(l => l.id === active);
+
+  return React.createElement("div", {
+    style: { display:"flex", gap:56, alignItems:"center", flexWrap:"wrap" }
+  },
+    // SVG onion
+    React.createElement("svg", {
+      viewBox:"0 0 380 380",
+      style:{ width:280, flexShrink:0, cursor:"pointer",
+        filter:"drop-shadow(0 4px 24px rgba(26,20,16,0.08))" }
+    },
+      React.createElement("defs", null,
+        React.createElement("radialGradient", { id:"lo-sheen", cx:"38%", cy:"32%", r:"52%" },
+          React.createElement("stop", { offset:"0%", stopColor:"rgba(255,255,255,0.15)" }),
+          React.createElement("stop", { offset:"100%", stopColor:"rgba(255,255,255,0)" })
+        )
+      ),
+      // Rings — outer to inner
+      [
+        { id:"l1", r:170, fill:"#d4c8b4" },
+        { id:"l2", r:115, fill:"#b8a890" },
+        { id:"l3", r:62,  fill:"#1a3a6e" },
+      ].map(ring =>
+        React.createElement("circle", {
+          key: ring.id,
+          cx:190, cy:190, r:ring.r,
+          fill: ring.fill,
+          stroke: active === ring.id ? "#8a6a10" : "rgba(26,20,16,0.08)",
+          strokeWidth: active === ring.id ? 2.5 : 1,
+          style:{ transition:"all 0.25s", opacity: active === ring.id ? 1 : (active ? 0.45 : 1), cursor:"pointer" },
+          onClick: () => setActive(ring.id),
+        })
+      ),
+      React.createElement("circle", { cx:190, cy:190, r:170, fill:"url(#lo-sheen)", pointerEvents:"none" }),
+      // Labels on rings
+      [
+        { id:"l1", r:145, text:"KNOWLEDGE SHARDS" },
+        { id:"l2", r:92,  text:"JOURNAL SHARDS" },
+        { id:"l3", r:40,  text:"HOT BUFFER",  fill:"rgba(200,185,160,0.9)" },
+      ].map(lbl =>
+        React.createElement("g", { key:lbl.id, pointerEvents:"none" },
+          React.createElement("path", { id:`lp-${lbl.id}`, d:`M ${190-lbl.r},190 A ${lbl.r},${lbl.r} 0 0,1 ${190+lbl.r},190`, fill:"none" }),
+          React.createElement("text", { fontSize:7, fill: lbl.fill || "rgba(26,20,16,0.45)", letterSpacing:2, fontFamily:"'DM Mono',monospace" },
+            React.createElement("textPath", { href:`#lp-${lbl.id}`, startOffset:"50%", textAnchor:"middle" }, lbl.text)
+          )
+        )
+      ),
+      // Active ring pulse
+      React.createElement("circle", {
+        cx:190, cy:190,
+        r: { l1:170, l2:115, l3:62 }[active],
+        fill:"none",
+        stroke:"rgba(138,106,16,0.2)",
+        strokeWidth:10,
+        style:{ animation:"lo-pulse 2s ease-in-out infinite" },
+        pointerEvents:"none",
+      }),
+      React.createElement("style", null, "@keyframes lo-pulse { 0%,100%{opacity:0.3;} 50%{opacity:0.8;} }")
+    ),
+
+    // Detail panel
+    React.createElement("div", { style:{ flex:1, minWidth:260 } },
+      // Layer tabs
+      React.createElement("div", { style:{ display:"flex", gap:8, marginBottom:28 } },
+        LAYERS.map(l =>
+          React.createElement("button", {
+            key: l.id,
+            onClick: () => setActive(l.id),
+            style:{
+              padding:"5px 14px",
+              background: active === l.id ? "var(--ink)" : "transparent",
+              color: active === l.id ? "var(--paper)" : "var(--ink-faint)",
+              border: `1px solid ${active === l.id ? "var(--ink)" : "var(--rule-strong)"}`,
+              borderRadius:3, fontSize:10, fontFamily:"'DM Mono',monospace",
+              cursor:"pointer", letterSpacing:"0.1em", transition:"all 0.15s",
+            }
+          }, l.label)
+        )
+      ),
+      React.createElement("div", {
+        key: active,
+        style:{ animation:"lo-fadeIn 0.2s ease both" }
+      },
+        React.createElement("div", { style:{ fontFamily:"'DM Mono',monospace", fontSize:9, letterSpacing:"0.22em", color:"var(--gold)", marginBottom:8, textTransform:"uppercase" } }, layer.meta),
+        React.createElement("div", { style:{ fontFamily:"'Spectral',serif", fontSize:26, fontWeight:300, color:"var(--ink)", marginBottom:12, letterSpacing:"-0.01em", lineHeight:1.15 } }, layer.name),
+        React.createElement("p", { style:{ fontSize:16, color:"var(--ink-dim)", lineHeight:1.72, marginBottom:16 } }, layer.desc),
+        React.createElement("div", { style:{ fontFamily:"'DM Mono',monospace", fontSize:11, color:"var(--ink-faint)", borderTop:"1px solid var(--rule)", paddingTop:14, lineHeight:1.7 } }, layer.example)
+      ),
+      React.createElement("style", null, "@keyframes lo-fadeIn { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }")
+    )
+  );
+}
+
+const layerRoot = ReactDOM.createRoot(document.getElementById("axm-layers-onion"));
+layerRoot.render(React.createElement(LayerOnion));
 </script>
 </body>
 </html>
