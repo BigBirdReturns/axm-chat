@@ -773,7 +773,7 @@ ext/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="294
       </div>
       <div class="spec-card">
         <div class="spec-title">Lineage + References</div>
-        <div class="spec-desc">When a decision shard supersedes a conversation shard, <code>lineage@1</code> records the chain. <code>references@1</code> links every decision claim back to the exact conversation turns that produced it.</div>
+        <div class="spec-desc">When a decision shard supersedes a conversation shard, <code>lineage&#64;1</code> records the chain. <code>references&#64;1</code> links every decision claim back to the exact conversation turns that produced it.</div>
       </div>
       <div class="spec-card">
         <div class="spec-title">Episodic Index</div>
@@ -1005,7 +1005,7 @@ const DEMO_QUERY_RESULTS = {
       ["post-hoc re-signing after distill","breaks Merkle chain — ext/ tables not included in original root","shard_d4e5f6"],
     ],
     sql:`SELECT object AS attempt, reasoning AS reason, shard_id AS shard\nFROM claims\nJOIN ext.engineering USING (claim_id)\nWHERE graveyard IS NOT NULL\n  AND subject LIKE '%merkle%'`,
-    note:"Query reached into ext/engineering@1.parquet graveyard field · 3 failed attempts recovered"
+    note:"Query reached into ext/engineering&#64;1.parquet graveyard field · 3 failed attempts recovered"
   },
   default: {
     columns:["subject","predicate","object"],
@@ -1170,8 +1170,8 @@ function DistillMode({ shards, onDistilled, serverOk }) {
         addLog(`  [${d.predicate.toUpperCase()}]  ${d.subject} → ${d.object}`, d.predicate === "rejected" ? "error" : "pass");
       }
       await delay(250); addLog("─────────────────────────────────────────────────────────────");
-      await delay(150); addLog("ext/engineering@1.parquet  written", "pass");
-      await delay(100); addLog("ext/episodes@1.parquet     written", "pass");
+      await delay(150); addLog("ext/engineering&#64;1.parquet  written", "pass");
+      await delay(100); addLog("ext/episodes&#64;1.parquet     written", "pass");
       await delay(100); addLog("Merkle recomputed  ·  shard resealed  ·  signed ML-DSA-44 ✓", "pass");
       setDecisions(DEMO_DECISIONS); setStatus("done"); return;
     }
