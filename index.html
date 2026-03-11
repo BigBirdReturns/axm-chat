@@ -5,133 +5,664 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AXM — Your AI conversations as sovereign knowledge</title>
   <meta name="description" content="Turn Claude, ChatGPT, and Gemini exports into cryptographically signed, queryable knowledge shards. No cloud. No API keys. Your laptop." />
-  
+  <meta property="og:title" content="AXM — Sovereign Knowledge" />
+  <meta property="og:description" content="Vector databases are search engines. This is version control for knowledge." />
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display:ital@0;1&family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
-  
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --ink:        #1a1410;
-      --ink-mid:    #3a3020;
-      --ink-dim:    #6a5e50;
-      --ink-faint:  #9a8870;
-      --paper:      #f5f0e8;
-      --paper-warm: #ede8dc;
-      --paper-deep: #e0d8cc;
-      --gold:       #8a6a10;
-      --gold-mid:   #b8960a;
-      --gold-bright:#c8a84b;
-      --rule:       rgba(26,20,16,0.12);
-      --code-bg:    #ebe5d8;
-      --code-text:  #1a1410;
+      /* Light world — parchment */
+      --ink:         #1a1410;
+      --ink-mid:     #3a3020;
+      --ink-dim:     #5a5040;
+      --ink-faint:   #9a8870;
+      --paper:       #f6f1e9;
+      --paper-warm:  #ede8dc;
+      --paper-deep:  #e2dace;
+      --gold:        #8a6a10;
+      --gold-bright: #c8a84b;
+      --rule:        rgba(26,20,16,0.10);
+      --rule-strong: rgba(26,20,16,0.18);
+      --code-bg:     #eae4d6;
+
     }
 
     html { scroll-behavior: smooth; }
+
     body {
       background: var(--paper);
       color: var(--ink);
       font-family: 'EB Garamond', Georgia, serif;
       font-size: 18px;
-      line-height: 1.7;
+      line-height: 1.75;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    .page { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+    /* ── GRAIN OVERLAY ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    .page { max-width: 1160px; margin: 0 auto; padding: 0 52px; }
+
+
 
     /* ── HEADER ── */
-    header { padding: 48px 0 0; border-bottom: 1px solid var(--rule); }
-    .header-inner { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 20px; }
-    .wordmark { font-family: 'Spectral', serif; font-size: 13px; font-weight: 300; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mid); }
-    .wordmark strong { font-weight: 600; color: var(--ink); }
-    nav { display: flex; gap: 32px; }
-    nav a { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); text-decoration: none; transition: color 0.15s; }
+    header {
+      padding: 40px 0 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 22px;
+    }
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Spectral', serif;
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--ink-mid);
+    }
+    .wordmark strong { font-weight: 600; color: var(--ink); letter-spacing: 0.18em; }
+    .wordmark-pip {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--gold-bright); opacity: 0.6;
+    }
+    nav { display: flex; gap: 40px; align-items: center; }
+    nav a {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      text-decoration: none;
+      transition: color 0.2s;
+      position: relative;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0; right: 0;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    }
     nav a:hover { color: var(--gold); }
+    nav a:hover::after { transform: scaleX(1); }
 
     /* ── HERO ── */
-    .hero { padding: 88px 0 104px; display: flex; flex-direction: column; gap: 24px; text-align: center; align-items: center; }
-    .kicker { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
-    h1 { font-family: 'Spectral', serif; font-size: clamp(42px, 6vw, 68px); font-weight: 300; line-height: 1.1; color: var(--ink); letter-spacing: -0.02em; max-width: 800px; }
+    .hero {
+      padding: 108px 0 96px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Vignette glow */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 20%; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 500px;
+      background: radial-gradient(ellipse, rgba(200,168,75,0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .kicker {
+      font-family: 'DM Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: riseUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+    h1 {
+      font-family: 'Spectral', serif;
+      font-size: clamp(46px, 6.4vw, 76px);
+      font-weight: 300;
+      line-height: 1.06;
+      color: var(--ink);
+      letter-spacing: -0.028em;
+      max-width: 860px;
+      margin-bottom: 0;
+      opacity: 0;
+      animation: riseUp 0.7s 0.2s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
     h1 em { font-style: italic; color: var(--ink-mid); }
-    .hero-body { font-size: 20px; color: var(--ink-dim); max-width: 580px; margin: 16px 0 32px; line-height: 1.5; }
-    .hero-actions { display: flex; gap: 16px; align-items: center; }
-    .btn-primary { display: inline-block; padding: 14px 32px; background: var(--ink); color: var(--paper); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border: none; cursor: pointer; transition: background 0.15s; border-radius: 2px; }
-    .btn-primary:hover { background: var(--ink-mid); }
-    .btn-ghost { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; transition: color 0.15s, border-color 0.15s; }
+
+    /* The thesis — the sentence that stops the scroll */
+    .hero-thesis {
+      margin: 56px auto 44px;
+      max-width: 700px;
+      font-family: 'Spectral', serif;
+      font-size: clamp(21px, 2.6vw, 29px);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--ink-mid);
+      line-height: 1.42;
+      position: relative;
+      padding: 0 56px;
+      opacity: 0;
+      animation: riseUp 0.7s 0.32s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+    .hero-thesis::before,
+    .hero-thesis::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      height: 1px;
+      width: 36px;
+      background: linear-gradient(90deg, transparent, var(--gold-bright));
+      opacity: 0.5;
+    }
+    .hero-thesis::before { left: 0; }
+    .hero-thesis::after  { right: 0; background: linear-gradient(270deg, transparent, var(--gold-bright)); }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--ink-dim);
+      max-width: 520px;
+      margin-bottom: 44px;
+      line-height: 1.6;
+      opacity: 0;
+      animation: riseUp 0.7s 0.44s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+      opacity: 0;
+      animation: riseUp 0.7s 0.54s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      padding: 13px 36px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: none; cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      border-radius: 3px;
+      box-shadow: 0 2px 16px rgba(26,20,16,0.18);
+    }
+    .btn-primary:hover {
+      background: var(--ink-mid);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(26,20,16,0.22);
+    }
+    .btn-ghost {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule-strong);
+      padding-bottom: 3px;
+      transition: color 0.2s, border-color 0.2s;
+    }
     .btn-ghost:hover { color: var(--gold); border-color: var(--gold-bright); }
 
     /* ── SECTIONS ── */
-    .rule-section { border-top: 1px solid var(--rule); padding: 88px 0; }
-    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 48px; }
-    .section-label span { margin-right: 16px; color: var(--ink-faint); }
+    .rule-section { border-top: 1px solid var(--rule); padding: 96px 0; }
 
-    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-    .problem-text h2 { font-family: 'Spectral', serif; font-size: 32px; font-weight: 300; color: var(--ink); margin-bottom: 24px; line-height: 1.2; }
-    .problem-text p { color: var(--ink-dim); margin-bottom: 24px; }
-    .thesis-box { padding: 24px; border-left: 3px solid var(--gold); background: var(--paper-warm); font-style: italic; color: var(--ink-mid); font-size: 17px; line-height: 1.6; }
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 60px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-label .n { color: var(--gold-bright); opacity: 0.7; }
+    .section-label::after {
+      content: '';
+      display: block;
+      width: 40px; height: 1px;
+      background: var(--rule-strong);
+    }
 
-    /* ── PIPELINE & REACT DEMO ── */
-    .pipeline-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-bottom: none; }
-    .pipeline-step { background: var(--paper); padding: 36px 32px; cursor: pointer; transition: background 0.2s; position: relative; }
-    .pipeline-step:hover { background: var(--paper-warm); }
-    .pipeline-step.active { background: var(--paper-deep); }
-    .pipeline-step.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
-    .step-num { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--gold); margin-bottom: 12px; }
-    .step-title { font-family: 'Spectral', serif; font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 10px; }
-    .step-body { font-size: 15px; color: var(--ink-dim); line-height: 1.65; }
+    /* ── PROBLEM ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+    .problem-text h2 {
+      font-family: 'Spectral', serif;
+      font-size: 34px;
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: 28px;
+      line-height: 1.18;
+      letter-spacing: -0.01em;
+    }
+    .problem-text p {
+      color: var(--ink-dim);
+      margin-bottom: 22px;
+      font-size: 18px;
+      line-height: 1.78;
+    }
 
-    .app-layout { display: flex; min-height: 540px; border: 1px solid var(--rule); background: var(--paper); box-shadow: 0 8px 36px rgba(26,20,16,0.06); align-items: stretch; }
-    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--paper); overflow: hidden; }
-    .app-scroll-area { flex: 1; overflow-y: auto; padding: 32px; }
-    .app-sidebar { width: 340px; flex-shrink: 0; border-left: 1px solid var(--rule); background: var(--paper-warm); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+    /* Graveyard callout — the key line from README */
+    .graveyard-callout {
+      margin-top: 32px;
+      padding: 24px 28px;
+      border-left: 2px solid var(--gold-bright);
+      background: var(--paper-warm);
+      position: relative;
+    }
+    .graveyard-callout::before {
+      content: 'FROM THE DISTILL ENGINE';
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .graveyard-callout p {
+      font-family: 'Spectral', serif;
+      font-style: italic;
+      font-size: 19px;
+      color: var(--ink-mid);
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
 
-    @keyframes appFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-    .app-fade { animation: appFadeIn 0.2s ease-out both; }
-    .svg-arc-text { transition: opacity 0.3s; }
+    .thesis-box {
+      padding: 36px 32px;
+      background: linear-gradient(145deg, var(--paper-warm) 0%, var(--paper-deep) 100%);
+      border: 1px solid var(--rule-strong);
+      border-top: 2px solid var(--ink);
+    }
+    .thesis-box .tb-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 16px;
+    }
+    .thesis-box strong {
+      display: block;
+      font-family: 'Spectral', serif;
+      font-size: 21px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 20px;
+      line-height: 1.35;
+    }
+    .thesis-box p {
+      font-size: 17px;
+      color: var(--ink-dim);
+      line-height: 1.72;
+      margin-bottom: 0;
+    }
+    .thesis-box code {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      padding: 2px 7px;
+      border-radius: 2px;
+      border: 1px solid var(--rule-strong);
+    }
 
-    /* ── PRIMITIVES & INSTALL ── */
-    .specs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .spec-card { border-top: 2px solid var(--ink); padding-top: 20px; }
-    .spec-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink); text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
-    .spec-desc { font-size: 14px; color: var(--ink-dim); line-height: 1.6; }
+    /* ── PIPELINE — THE THRESHOLD ── */
+    /* This section deliberately darkens as you enter the product */
+    .pipeline-wrapper {
+      position: relative;
+    }
 
-    .install-block { background: var(--code-bg); border-radius: 4px; padding: 32px 36px; margin-bottom: 20px; overflow-x: auto; border: 1px solid var(--rule); }
-    pre { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.9; color: var(--code-text); }
-    .comment { color: var(--ink-faint); font-style: italic; }
-    .cmd { color: var(--ink); font-weight: 500; cursor: pointer; }
-    .str { color: var(--gold); }
-    .install-note { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-dim); line-height: 1.8; }
-    .install-note code { background: var(--code-bg); padding: 1px 5px; border-radius: 2px; font-size: 10px; border: 1px solid var(--rule); }
+    .pipeline-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      position: relative;
+      z-index: 2;
+      border-radius: 6px 6px 0 0;
+      overflow: hidden;
+      border: 1px solid var(--rule-strong);
+      border-bottom: none;
+    }
+    .pipeline-step {
+      background: var(--paper-warm);
+      padding: 40px 36px 34px;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule-strong);
+    }
+    .pipeline-step:last-child { border-right: none; }
+    .pipeline-step:hover { background: var(--paper-deep); }
+    .pipeline-step.active {
+      background: var(--paper-deep);
+      border-bottom: 1px solid var(--paper-deep);
+      margin-bottom: -1px;
+      z-index: 10;
+    }
+    .pipeline-step.active .step-num { color: var(--gold); }
+    .pipeline-step.active .step-title { color: var(--ink); }
+    .pipeline-step.active .step-body { color: var(--ink-dim); }
+    .pipeline-step.active::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 100%);
+    }
+    .pipeline-step.active .step-check {
+      opacity: 1;
+    }
+    .step-check {
+      display: inline-block;
+      margin-left: 8px;
+      color: var(--gold);
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
 
-    footer { border-top: 1px solid var(--rule); padding: 40px 0 48px; display: flex; justify-content: space-between; align-items: center; }
-    .footer-left { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--ink-faint); }
-    .footer-right { font-family: 'Spectral', serif; font-size: 13px; font-style: italic; color: var(--ink-faint); }
-    .footer-links { display: flex; gap: 24px; margin-top: 8px; }
-    .footer-links a { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--ink-faint); text-decoration: none; transition: color 0.15s; }
+    .step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--gold);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .step-title {
+      font-family: 'Spectral', serif;
+      font-size: 27px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+      transition: color 0.2s;
+    }
+    .step-body {
+      font-size: 15.5px;
+      color: var(--ink-dim);
+      line-height: 1.65;
+      transition: color 0.2s;
+    }
+
+    /* ── DEMO PANEL — parchment, consistent with the rest of the page ── */
+    .app-layout {
+      border: 1px solid var(--rule-strong);
+      border-top: none;
+      background: var(--paper-warm);
+      border-radius: 0 0 6px 6px;
+    }
+    .app-scroll-area {
+      padding: 44px 48px;
+    }
+    .app-scroll-area::-webkit-scrollbar { width: 4px; }
+    .app-scroll-area::-webkit-scrollbar-track { background: transparent; }
+    .app-scroll-area::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 2px; }
+
+    @keyframes riseUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes appIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .app-fade { animation: appIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+    /* ── SHARD ANATOMY ── */
+    .shard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: start;
+    }
+    .shard-grid .problem-text h2 { font-size: 28px; }
+    .shard-grid .problem-text p { font-size: 17px; }
+    .shard-grid .problem-text p code,
+    .shard-grid .problem-text code {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 7px;
+      border-radius: 2px;
+      border: 1px solid var(--rule-strong);
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--rule-strong);
+      border-radius: 4px;
+      padding: 28px 32px;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      font-family: 'DM Mono', monospace;
+      font-size: 13.5px;
+      line-height: 2.0;
+      color: var(--ink-mid);
+    }
+    .code-block .comment { color: var(--ink-faint); font-style: italic; }
+    .code-block .str     { color: var(--gold); }
+    .code-block .path    { color: var(--ink-dim); }
+    #manifest-example    { color: var(--ink-mid); }
+
+    /* ── PRIMITIVES ── */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+    }
+    .spec-card { border-top: 1.5px solid var(--ink); padding-top: 22px; }
+    .spec-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--ink);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+    .spec-desc { font-size: 15.5px; color: var(--ink-dim); line-height: 1.65; }
+    .spec-desc code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12.5px;
+      background: var(--code-bg);
+      padding: 1px 5px;
+      border-radius: 2px;
+      border: 1px solid var(--rule-strong);
+    }
+
+    /* ── INSTALL ── */
+    .install-block {
+      background: var(--code-bg);
+      border: 1px solid var(--rule-strong);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .install-block-body { padding: 28px 32px; }
+    .install-phase {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .install-phase:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .install-phase-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      color: var(--gold);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .install-block pre {
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      line-height: 2.0;
+      color: var(--ink-mid);
+    }
+    .install-block .comment { color: var(--ink-faint); font-style: italic; }
+    .install-block .str     { color: var(--gold); }
+    .install-note {
+      margin-top: 18px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--ink-faint);
+      line-height: 1.8;
+    }
+    .install-note code {
+      background: var(--paper-deep);
+      padding: 2px 7px;
+      border-radius: 2px;
+      font-size: 12px;
+      border: 1px solid var(--rule-strong);
+      color: var(--ink-mid);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 48px 0 72px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-left {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+    }
+    .footer-right {
+      font-family: 'Spectral', serif;
+      font-size: 15px;
+      font-style: italic;
+      color: var(--ink-faint);
+    }
+    .footer-links { display: flex; gap: 24px; margin-top: 14px; }
+    .footer-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
     .footer-links a:hover { color: var(--gold); }
 
-    @media (max-width: 900px) {
-      .problem-grid { grid-template-columns: 1fr; gap: 40px; }
-      .pipeline-nav { grid-template-columns: 1fr; border-bottom: 1px solid var(--rule); }
-      .app-layout { flex-direction: column-reverse; min-height: auto; border-top: none; }
-      .app-sidebar { width: 100%; border-left: none; border-bottom: 1px solid var(--rule); padding: 24px 16px; flex-direction: row; justify-content: space-around; }
-      .app-sidebar svg { max-width: 180px !important; }
-      .svg-arc-text { display: none; }
+    /* ── THREE-LAYER ARCHITECTURE ── */
+    .layer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--rule-strong);
+      border: 1px solid var(--rule-strong);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .layer-card {
+      background: var(--paper-warm);
+      padding: 36px 32px;
+    }
+    .layer-card:first-child { background: var(--paper); }
+    .layer-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .layer-name {
+      font-family: 'Spectral', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+    .layer-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--ink-faint);
+      margin-bottom: 20px;
+    }
+    .layer-desc {
+      font-size: 15.5px;
+      color: var(--ink-dim);
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+    .layer-example {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--ink-faint);
+      font-style: italic;
+      border-top: 1px solid var(--rule);
+      padding-top: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .problem-grid, .shard-grid { grid-template-columns: 1fr; gap: 40px; }
+      .pipeline-nav { grid-template-columns: 1fr; border-radius: 6px 6px 0 0; }
+      .pipeline-step { border-right: none; }
       .specs-grid { grid-template-columns: repeat(2, 1fr); }
-      .page { padding: 0 24px; }
+      .layer-grid { grid-template-columns: 1fr; }
+      .page { padding: 0 28px; }
     }
     @media (max-width: 540px) {
       .specs-grid { grid-template-columns: 1fr; }
-      .page { padding: 0 16px; }
-      h1 { font-size: 32px !important; }
-      .app-scroll-area { padding: 20px 16px; }
-      footer { flex-direction: column; gap: 12px; text-align: center; }
+      .page { padding: 0 20px; }
+      h1 { font-size: 40px !important; }
+      .app-scroll-area { padding: 28px 20px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { justify-content: center; }
+      .hero-thesis { padding: 0 20px; font-size: 20px; }
+      .hero-thesis::before, .hero-thesis::after { display: none; }
     }
   </style>
 </head>
@@ -140,9 +671,14 @@
 
   <header>
     <div class="header-inner">
-      <div class="wordmark"><strong>AXM</strong> &thinsp;·&thinsp; Axiom</div>
+      <div class="wordmark">
+        <strong>AXM</strong>
+        <span class="wordmark-pip"></span>
+        Axiom
+      </div>
       <nav>
-        <a href="#how">How it works</a>
+        <a href="#how">Pipeline</a>
+        <a href="#architecture">Architecture</a>
         <a href="#install">Install</a>
         <a href="https://github.com/BigBirdReturns/axm-genesis" target="_blank">GitHub</a>
       </nav>
@@ -152,9 +688,8 @@
   <section class="hero">
     <div class="kicker">axm-genesis v1.2.0 &nbsp;·&nbsp; axm-chat v0.1.0 &nbsp;·&nbsp; Apache 2.0</div>
     <h1>Your AI conversations<br />as <em>sovereign knowledge</em></h1>
-    <p class="hero-body">
-      Turn Claude, ChatGPT, and Gemini exports into cryptographically signed, offline-queryable knowledge shards. Your data. Your keys. Your machine.
-    </p>
+    <p class="hero-thesis">Vector databases are search engines.<br />This is version control for knowledge.</p>
+    <p class="hero-sub">Turn Claude, ChatGPT, and Gemini exports into cryptographically signed, offline-queryable knowledge shards. Your data. Your keys. Your machine.</p>
     <div class="hero-actions">
       <a href="#install" class="btn-primary">Run it locally</a>
       <a href="#how" class="btn-ghost">View the pipeline</a>
@@ -162,46 +697,51 @@
   </section>
 
   <section class="rule-section" id="problem">
-    <div class="section-label"><span>01</span>The Context Collapse</div>
+    <div class="section-label"><span class="n">01</span> The Context Collapse</div>
     <div class="problem-grid">
       <div class="problem-text">
         <h2>Vendor APIs are memory black holes.</h2>
         <p>You spend hours reasoning through architecture, strategic planning, and complex decisions with LLMs. That cognitive work is trapped inside fragmented chat interfaces controlled by vendors.</p>
-        <p>When you need to remember why a specific path was chosen or what alternatives were rejected, the context is gone. Search fails because the decisions were never formally committed. The data is locked in the cloud.</p>
+        <p>When you need to remember why a specific path was chosen or what alternatives were rejected, the context is gone. Search fails because the decisions were never formally committed.</p>
+        <div class="graveyard-callout">
+          <p>The graveyard of failed attempts is the most valuable part of the record. It prevents the same dead ends later.</p>
+        </div>
       </div>
       <div class="thesis-box">
-        <strong>Vector databases are search engines. This is version control for knowledge.</strong><br><br>
-        The AXM protocol was built to verify autonomous robotics doctrine offline. <code>axm-chat</code> applies that exact same cryptographic rigidity to your personal knowledge base.
+        <div class="tb-label">The Protocol</div>
+        <strong>Not a search index — a provenance record.</strong>
+        <p>The AXM protocol was built to verify autonomous robotics doctrine offline. <code>axm-chat</code> applies that same cryptographic rigidity to your personal knowledge base. Every decision is signed, every claim is traceable, every shard is yours.</p>
       </div>
     </div>
   </section>
 
   <section class="rule-section" id="how">
-    <div class="section-label"><span>02</span>The Pipeline</div>
-    <div id="axm-chat-app"></div>
+    <div class="section-label"><span class="n">02</span> The Pipeline</div>
+    <div class="pipeline-wrapper">
+      <div id="axm-chat-app"></div>
+    </div>
   </section>
 
   <section class="rule-section">
-    <div class="section-label"><span>03</span>Shard Anatomy</div>
-
-    <div class="problem-grid" style="gap: 48px; align-items: start;">
+    <div class="section-label"><span class="n">03</span> Shard Anatomy</div>
+    <div class="shard-grid">
       <div class="problem-text">
-        <h2 style="font-size: 24px; margin-bottom: 16px;">No black boxes. Just files.</h2>
-        <p style="font-size: 15px; margin-bottom: 16px;">A "shard" is not a proprietary database. It is a standard directory. You can zip it, email it, or query it with any data science tool. The security is in the cryptography, not the storage medium.</p>
-        <p style="font-size: 15px;">Click <code>manifest.json</code> to inspect the structure. This is the exact artifact <code>axm-chat</code> produces. <code>axm-core</code> mounts these directories directly into DuckDB at query time.</p>
+        <h2>No black boxes. Just files.</h2>
+        <p>A "shard" is not a proprietary database. It is a standard directory. You can zip it, email it, or query it with any data science tool. The security is in the cryptography, not the storage medium.</p>
+        <p>Click <code>manifest.json</code> to inspect the structure. This is the exact artifact <code>axm-chat</code> produces. <code>axm-core</code> mounts these directories directly into DuckDB at query time.</p>
       </div>
-      <div class="install-block" style="margin-bottom: 0;">
+      <div class="code-block">
 <pre><span class="comment"># A compiled AXM conversation shard</span>
-~/.axm/shards/chat_My_Conversation_abc123/
+<span class="path">~/.axm/shards/chat_My_Conversation_abc123/</span>
 
-<span class="cmd" onclick="toggleManifest()">manifest.json</span>           <span class="comment"># metadata + Merkle root</span>
-content/source.txt       <span class="comment"># full transcript</span>
-graph/claims.parquet     <span class="comment"># extracted structured claims</span>
-sig/manifest.sig         <span class="comment"># ML-DSA-44 signature</span>
-ext/episodes@1.parquet   <span class="comment"># topics · people · tools · tone · state</span>
-ext/engineering@1.parquet <span class="comment"># problem · graveyard · solution · rule</span>
-ext/lineage@1.parquet    <span class="comment"># supersession chain (decision shards)</span></pre>
-<pre id="manifest-example" style="display:none; margin-top:12px; border-top:1px solid var(--rule); padding-top:12px;">{
+<span class="cmd" onclick="toggleManifest()" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;">manifest.json</span>             <span class="comment"># metadata + Merkle root</span>
+content/source.txt         <span class="comment"># full transcript</span>
+graph/claims.parquet       <span class="comment"># structured claims</span>
+sig/manifest.sig           <span class="comment"># ML-DSA-44 signature</span>
+ext/episodes@1.parquet     <span class="comment"># topics · people · tools · state</span>
+ext/engineering@1.parquet  <span class="comment"># problem · graveyard · solution · rule</span>
+ext/lineage@1.parquet      <span class="comment"># supersession chain</span></pre>
+<pre id="manifest-example" style="display:none; margin-top:16px; border-top:1px solid var(--rule-strong); padding-top:16px;">{
   "spec_version": "1.0.0",
   "shard_id": "chat_My_Conversation_abc123",
   "shard_type": "conversation",
@@ -217,7 +757,7 @@ ext/lineage@1.parquet    <span class="comment"># supersession chain (decision sh
   </section>
 
   <section class="rule-section">
-    <div class="section-label"><span>04</span>The Primitives</div>
+    <div class="section-label"><span class="n">04</span> The Primitives</div>
     <div class="specs-grid">
       <div class="spec-card">
         <div class="spec-title">BLAKE3 Merkle Trees</div>
@@ -232,41 +772,132 @@ ext/lineage@1.parquet    <span class="comment"># supersession chain (decision sh
         <div class="spec-desc">Shards are stored locally as compressed Parquet files. At query time, the Spectra engine mounts them in-memory via DuckDB for instant relational analysis.</div>
       </div>
       <div class="spec-card">
-        <div class="spec-title">Lineage + References</div>
-        <div class="spec-desc">When a decision shard supersedes a conversation shard, <code>lineage@1</code> records the chain. <code>references@1</code> links every decision claim back to the exact conversation turns that produced it.</div>
-      </div>
-      <div class="spec-card">
-        <div class="spec-title">Episodic Index</div>
-        <div class="spec-desc">Every conversation receives a universal base pass: topic tags, named people, tools, project references, question text, resolution state, and tone — written to <code>ext/episodes@1.parquet</code> in the source shard.</div>
-      </div>
-      <div class="spec-card">
-        <div class="spec-title">Engineering Lens</div>
-        <div class="spec-desc">A gated second pass for technical conversations. Extracts the problem statement, graveyard of failed attempts, working solution, and any architectural rule that emerged — written to <code>ext/engineering@1.parquet</code>.</div>
+        <div class="spec-title">Episodic + Lens</div>
+        <div class="spec-desc">Every conversation gets a universal episodic index: topics, people, tools, state, tone. Technical conversations get the engineering lens: the problem, the graveyard of failed attempts, the solution, the rule that emerged.</div>
       </div>
     </div>
   </section>
 
   <section class="rule-section" id="install">
-    <div class="section-label"><span>05</span>Local Execution</div>
+    <div class="section-label"><span class="n">05</span> Local Execution</div>
     <div class="install-block">
-<pre><span class="comment"># Install the AXM stack (Python 3.10+)</span>
-<span class="cmd">pip install -e ./axm-genesis</span>    <span class="comment"># cryptographic compiler + verifier</span>
+      <div class="install-block-body">
+        <div class="install-phase">
+          <div class="install-phase-label">Install</div>
+          <pre><span class="cmd">pip install -e ./axm-genesis</span>    <span class="comment"># cryptographic compiler + verifier</span>
 <span class="cmd">pip install -e ./axm-core</span>       <span class="comment"># Spectra DuckDB query engine</span>
-<span class="cmd">pip install -e ./axm-chat</span>       <span class="comment"># chat spoke</span>
-
-<span class="comment"># Export your conversations, then import</span>
-<span class="cmd">axm-chat import</span> <span class="str">./conversations.json</span>
-
-<span class="comment"># Index episodes + extract decisions using a local model</span>
-<span class="cmd">ollama serve && ollama pull mistral</span>
-<span class="cmd">axm-chat distill</span>
-
-<span class="comment"># Query your sovereign data</span>
-<span class="cmd">axm-chat query</span> <span class="str">"what decisions have we made"</span>
+<span class="cmd">pip install -e ./axm-chat</span>       <span class="comment"># chat spoke</span></pre>
+        </div>
+        <div class="install-phase">
+          <div class="install-phase-label">Import</div>
+          <pre><span class="cmd">axm-chat import</span> <span class="str">./conversations.json</span>    <span class="comment"># one signed shard per conversation</span></pre>
+        </div>
+        <div class="install-phase">
+          <div class="install-phase-label">Distill</div>
+          <pre><span class="cmd">ollama serve && ollama pull mistral</span>
+<span class="cmd">axm-chat distill</span>                <span class="comment"># episodic index + decision extraction</span></pre>
+        </div>
+        <div class="install-phase">
+          <div class="install-phase-label">Query</div>
+          <pre><span class="cmd">axm-chat query</span> <span class="str">"what decisions have we made"</span>
+<span class="cmd">axm-chat query</span> <span class="str">"what failed before we solved the merkle problem"</span>
 <span class="cmd">axm-chat query</span> <span class="str">"what changed since january"</span>
-<span class="cmd">axm-chat verify</span>                <span class="comment"># offline Merkle + signature check</span></pre>
+<span class="cmd">axm-chat verify</span>                 <span class="comment"># offline Merkle + signature check</span></pre>
+        </div>
+      </div>
     </div>
     <p class="install-note">All data stays in <code>~/.axm/shards/</code> on your machine. Verify any shard entirely offline: <code>axm-verify ./shard_dir</code></p>
+  </section>
+
+  <section class="rule-section" id="architecture">
+    <div class="section-label"><span class="n">06</span> Three Layers</div>
+    <div class="problem-text" style="max-width:680px; margin-bottom:40px;">
+      <h2>Memory has a shape.</h2>
+      <p>AXM operates across three layers that share one container format but serve different temporal purposes. The protocol does not distinguish between them — all shards are structurally identical. The distinction is semantic, enforced by convention.</p>
+    </div>
+    <div class="layer-grid">
+      <div class="layer-card">
+        <div class="layer-label">Layer 1</div>
+        <div class="layer-name">Knowledge Shards</div>
+        <div class="layer-meta">Build-time · Immutable</div>
+        <p class="layer-desc">Compiled reference material. A document enters Forge, claims are extracted, Merkle root is computed, ML-DSA-44 signs it. The shard is sealed. It never changes. You can verify it a decade from now without this software.</p>
+        <div class="layer-example">FM 21-11 field medicine · California Family Code §2030 · your architecture conversations</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-label">Layer 2</div>
+        <div class="layer-name">Journal Shards</div>
+        <div class="layer-meta">Session-boundary · Immutable</div>
+        <p class="layer-desc">Decision traces. Not what the manual says — how the manual was applied. Every query, every retrieval gate, every rejected candidate is a claim. Future queries can see both the doctrine and the history of how it was used.</p>
+        <div class="layer-example">what we tried · what failed · what survived · when the rule changed</div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-label">Layer 3</div>
+        <div class="layer-name">Hot Buffer</div>
+        <div class="layer-meta">Append-only · Working memory</div>
+        <p class="layer-desc">No cryptographic overhead. Nanosecond appends. Structured JSONL records written as events occur. When the session ends — or a size or time threshold fires — the buffer is compiled into a journal shard and sealed.</p>
+        <div class="layer-example">live trace events · seal trigger on session close or every 1000 events</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rule-section" id="gold">
+    <div class="section-label"><span class="n">07</span> Definition of Correctness</div>
+    <div class="problem-grid">
+      <div class="problem-text">
+        <h2>The gold shard is the spec.</h2>
+        <p>Not a test suite. Not a reference document. A specific directory of actual files — <code>fm21-11-hemorrhage-v1/</code> — extracted from the US Army first aid field manual. It was compiled once. It will never be recompiled.</p>
+        <p>Any verifier that accepts this shard and rejects the invalid vectors in <code>tests/vectors/</code> is conformant. A change that breaks the gold shard is rejected, full stop. This is what "frozen kernel" means in practice.</p>
+        <div class="graveyard-callout" style="margin-top:28px;">
+          <p>The gold shard is the definition of correctness. Not the code. Not the docs.</p>
+        </div>
+      </div>
+      <div class="code-block" style="font-size:13.5px;">
+<pre><span class="comment"># axm-genesis conformance contract</span>
+<span class="comment"># Any verifier that passes all of these is conformant.</span>
+
+<span class="path">shards/gold/fm21-11-hemorrhage-v1/</span>    <span class="comment"># MUST pass</span>
+<span class="path">tests/vectors/invalid/bad_signature</span>   <span class="comment"># MUST reject</span>
+<span class="path">tests/vectors/invalid/merkle_mismatch</span> <span class="comment"># MUST reject</span>
+<span class="path">tests/vectors/invalid/orphan_claim</span>    <span class="comment"># MUST reject</span>
+<span class="path">tests/vectors/invalid/null_in_column</span>  <span class="comment"># MUST reject</span>
+
+<span class="comment"># Verify the gold shard yourself:</span>
+<span class="cmd">axm-verify shard</span> <span class="str">shards/gold/fm21-11-hemorrhage-v1/</span> \
+  <span class="cmd">--trusted-key</span> <span class="str">keys/canonical_test_publisher.pub</span>
+
+<span class="comment"># Output: {"status":"PASS","error_count":0,"errors":[]}</span>
+<span class="comment"># Same output. Every machine. Every version. Forever.</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="rule-section" id="req5">
+    <div class="section-label"><span class="n">08</span> Non-Selective Recording</div>
+    <div class="problem-grid">
+      <div class="problem-text">
+        <h2>REQ 5: you cannot delete frames.</h2>
+        <p>For embodied spokes — robotics, sensor streams, any agent that maintains a binary hot buffer — the verifier enforces frame continuity. A gap in the <code>cam_latents.bin</code> sequence is a compliance failure. You cannot selectively delete the moment before an error occurred.</p>
+        <p>This is the technical implementation of the graveyard invariant: the record of what failed is as protected as the record of what succeeded. <code>E_BUFFER_DISCONTINUITY</code> fires on any gap, truncation, or bad magic — before the shard can be verified.</p>
+        <p style="margin-bottom:0;">Chat shards and document shards are unaffected. This check runs only when <code>content/cam_latents.bin</code> is present.</p>
+      </div>
+      <div class="code-block">
+<pre><span class="comment"># cam_latents.bin binary format</span>
+<span class="comment"># File: [AXLF(4)] [records …]</span>
+<span class="comment"># Record: [AXLR(4)] [ver(1)] [frame_id(4)] [len(4)] [payload]</span>
+
+<span class="comment"># A gap between frame 4 and frame 6 → FAIL</span>
+frame 0  blake3:a1b2c3…  ✓
+frame 1  blake3:d4e5f6…  ✓
+frame 2  blake3:g7h8i9…  ✓
+frame 3  blake3:j1k2l3…  ✓
+frame 4  blake3:m4n5o6…  ✓
+<span class="str">frame 5  [MISSING]</span>       <span class="comment"># E_BUFFER_DISCONTINUITY</span>
+frame 6  blake3:p7q8r9…  ✗ rejected
+
+<span class="comment"># axm-verify halts here. The shard cannot pass.</span>
+<span class="comment"># The moment before the failure is part of the record.</span></pre>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -281,18 +912,48 @@ ext/lineage@1.parquet    <span class="comment"># supersession chain (decision sh
     <div class="footer-right">your conversations · your claims · your keys</div>
   </footer>
 
-</div>
+</div><!-- /.page -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
+// ── Scroll ──────────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Manifest toggle ────────────────────────────────────────────────
+function toggleManifest() {
+  const el = document.getElementById('manifest-example');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+<script type="text/babel">
 // ─── AXM Chat Pipeline + Glass Onion ──────────────────────────────
 
 const SERVER_URL = "http://localhost:8410";
 let _backendUrl = null;
 
+// Demo panel uses the same parchment palette as the page
+const D = {
+  dark:    "#f6f1e9",   // paper (inverted naming kept for minimal diff)
+  surface: "#ede8dc",
+  raised:  "#e2dace",
+  border:  "rgba(26,20,16,0.12)",
+  text:    "#1a1410",
+  dim:     "#5a5040",
+  faint:   "#9a8870",
+  gold:    "#8a6a10",
+  pass:    "#3a6030",
+  fail:    "#a03020",
+  rule:    "rgba(26,20,16,0.10)",
+};
+
+// Parchment palette for inside the panel (text/labels remain readable)
 const P = {
-  paper:    "#f5f0e8",
+  paper:    "#f6f1e9",
   paperMid: "#ebe5d8",
-  paperDeep:"#d6cfc0",
+  paperDeep:"#e2dace",
   ink:      "#1a1410",
   inkFaint: "#6a5e50",
   inkDim:   "#3a3020",
@@ -300,167 +961,116 @@ const P = {
   gold:     "#8a6a10",
   pass:     "#3a6030",
   fail:     "#a03020",
-  blueLight:"#4a6aae",
-};
-
-const RING_FILL = {
-  world:"#e8e0d0", spoke:"#d4c8b4", core:"#b8a890", genesis:"#887c64", kernel:"#1a3a6e"
 };
 
 const DEMO_SHARDS = [
-  { name:"shard_a1b2c3", title:"AXM architecture — kernel design",       claims:34, is_decision:true,  verified:true  },
+  { name:"shard_a1b2c3", title:"AXM architecture — kernel design",       claims:34, is_decision:false, verified:true  },
   { name:"shard_d4e5f6", title:"axm-chat — spoke design conversations",  claims:22, is_decision:false, verified:true  },
   { name:"shard_g7h8i9", title:"axm-core — Spectra query engine design",  claims:19, is_decision:false, verified:true  },
 ];
 
 const DEMO_DECISIONS = [
-  { subject:"axm-genesis", predicate:"adopted",  object:"immutable cryptographic kernel pattern",    reasoning:"Separating the signing layer from orchestration lets spokes extend independently without touching trust.", decided_at:"2026-02-14" },
-  { subject:"deployment",  predicate:"rejected", object:"vendor cloud storage for shards",            reasoning:"Defeats the core invariant. Sovereign knowledge requires the owner controls the storage medium.", decided_at:"2026-02-14" },
-  { subject:"axm-chat",    predicate:"adopted",  object:"two-pass pipeline — import then distill",    reasoning:"Pass 1 requires no LLM. Separating signing from extraction means the shard is valid before any model runs.", decided_at:"2026-02-15" },
-  { subject:"query layer", predicate:"adopted",  object:"DuckDB over Parquet as the query surface",  reasoning:"Standard tooling. Any data scientist can inspect shards without the AXM stack installed.", decided_at:"2026-02-16" },
+  {
+    subject:"axm-genesis",
+    predicate:"adopted",
+    object:"immutable cryptographic kernel pattern",
+    reasoning:"Separating the signing layer from orchestration lets spokes extend independently without touching trust.",
+    decided_at:"2026-02-14",
+    graveyard:["mutable manifest (rejected: defeats Merkle invariant)", "runtime re-signing (rejected: opens TOCTOU window)"],
+  },
+  {
+    subject:"deployment",
+    predicate:"rejected",
+    object:"vendor cloud storage for shards",
+    reasoning:"Defeats the core invariant. Sovereign knowledge requires the owner controls the storage medium.",
+    decided_at:"2026-02-14",
+    graveyard:["S3 with client-side encryption (rejected: key escrow risk)", "IPFS pinning (rejected: network dependency for offline use)"],
+  },
+  {
+    subject:"axm-chat",
+    predicate:"adopted",
+    object:"two-pass pipeline — import then distill",
+    reasoning:"Pass 1 requires no LLM. Separating signing from extraction means the shard is cryptographically valid before any model runs.",
+    decided_at:"2026-02-15",
+    graveyard:["single-pass with inline extraction (rejected: LLM failure voids signing)", "post-hoc re-signing after distill (rejected: breaks Merkle chain)"],
+  },
+  {
+    subject:"query layer",
+    predicate:"adopted",
+    object:"DuckDB over Parquet as the query surface",
+    reasoning:"Standard tooling. Any data scientist can inspect shards without the AXM stack installed.",
+    decided_at:"2026-02-16",
+    graveyard:["SQLite (rejected: row-oriented, poor for claim graphs)", "custom binary format (rejected: opaque, anti-thesis of the project)"],
+  },
 ];
 
 const DEMO_QUERY_RESULTS = {
   "what decisions have we made": {
     columns:["subject","predicate","object","date"],
     rows: DEMO_DECISIONS.map(d=>[d.subject,d.predicate,d.object,d.decided_at]),
-    sql:"SELECT subject, predicate, object, decided_at\nFROM claims WHERE shard_type = 'decision'\nORDER BY decided_at DESC",
+    sql:`SELECT subject, predicate, object, decided_at\nFROM claims\nJOIN shards USING (shard_id)\nWHERE predicate IN ('adopted','rejected')\nORDER BY decided_at DESC`,
+    note:"4 decision records across 3 shards · 2 adopted · 1 rejected · verified ✓"
   },
-  "timeline of choices": {
-    columns:["date","subject","predicate"],
-    rows: [...DEMO_DECISIONS].sort((a,b)=>a.decided_at.localeCompare(b.decided_at)).map(d=>[d.decided_at,d.subject,d.predicate]),
-    sql:"SELECT decided_at, subject, predicate\nFROM claims WHERE predicate IN ('adopted','rejected')\nORDER BY decided_at ASC",
+  "what failed before we solved the merkle problem": {
+    columns:["attempt","reason","shard"],
+    rows:[
+      ["mutable manifest","defeats Merkle invariant — root changes on every update","shard_a1b2c3"],
+      ["runtime re-signing","opens TOCTOU window between compute and write","shard_a1b2c3"],
+      ["post-hoc re-signing after distill","breaks Merkle chain — ext/ tables not included in original root","shard_d4e5f6"],
+    ],
+    sql:`SELECT object AS attempt, reasoning AS reason, shard_id AS shard\nFROM claims\nJOIN ext.engineering USING (claim_id)\nWHERE graveyard IS NOT NULL\n  AND subject LIKE '%merkle%'`,
+    note:"Query reached into ext/engineering@1.parquet graveyard field · 3 failed attempts recovered"
   },
   default: {
     columns:["subject","predicate","object"],
     rows: DEMO_DECISIONS.slice(0,3).map(d=>[d.subject,d.predicate,d.object]),
-    sql:"SELECT subject, predicate, object FROM claims LIMIT 10",
+    sql:`SELECT subject, predicate, object\nFROM claims LIMIT 10`,
+    note:"Showing first 10 claims across mounted shards"
   },
 };
 
 function delay(ms) { return new Promise(r=>setTimeout(r,ms)); }
-
-// ─── Glass Onion SVG ──────────────────────────────────────────────
-function GlassOnion({ mode, shardCount }) {
-  const activeRing = { import:"spoke", distill:"core", query:"kernel" }[mode];
-  const layers = [
-    { id:"world",   r:188 }, { id:"spoke",  r:148 },
-    { id:"core",    r:108 }, { id:"genesis", r:68 }, { id:"kernel", r:34 },
-  ];
-  const pulseColor = {
-    import:"rgba(138,106,16,0.3)", distill:"rgba(58,96,48,0.25)", query:"rgba(26,58,110,0.3)"
-  };
-  const pulseR = { import:148, distill:108, query:34 };
-
-  return React.createElement("svg", {
-    viewBox:"0 0 400 400",
-    style:{ width:"100%", maxWidth:280, filter:"drop-shadow(0 4px 20px rgba(0,0,0,0.06))" }
-  },
-    React.createElement("defs", null,
-      React.createElement("radialGradient", { id:"rg-sheen", cx:"38%", cy:"32%", r:"52%" },
-        React.createElement("stop", { offset:"0%",   stopColor:"rgba(255,255,255,0.18)" }),
-        React.createElement("stop", { offset:"100%", stopColor:"rgba(255,255,255,0)" })
-      )
-    ),
-    ...[...layers].reverse().map(l => {
-      const isActive = activeRing === l.id;
-      const dimmed   = !!mode && !isActive && l.id !== "world";
-      return React.createElement("g", {
-        key:l.id, style:{ opacity:dimmed?0.3:1, transition:"opacity 0.4s ease" }
-      },
-        React.createElement("circle", {
-          cx:200, cy:200, r:l.r,
-          fill: RING_FILL[l.id],
-          stroke: isActive ? P.gold : "rgba(26,20,16,0.08)",
-          strokeWidth: isActive ? 2 : 1,
-          style:{ transition:"all 0.4s ease" }
-        })
-      );
-    }),
-    React.createElement("circle", { cx:200, cy:200, r:188, fill:"url(#rg-sheen)", pointerEvents:"none" }),
-    React.createElement("g", { stroke:"rgba(26,20,16,0.05)", strokeWidth:1, pointerEvents:"none" },
-      React.createElement("line", { x1:200, y1:12,  x2:200, y2:165 }),
-      React.createElement("line", { x1:388, y1:200, x2:235, y2:200 }),
-      React.createElement("line", { x1:200, y1:388, x2:200, y2:235 }),
-      React.createElement("line", { x1:12,  y1:200, x2:165, y2:200 })
-    ),
-    React.createElement("g", { className:"svg-arc-text", pointerEvents:"none", fontFamily:"'DM Mono',monospace" },
-      React.createElement("path", { id:"lp-world", d:"M 18,200 A 182,182 0 0,1 382,200", fill:"none" }),
-      React.createElement("text", { fontSize:8, fill:P.inkFaint, letterSpacing:2 },
-        React.createElement("textPath", { href:"#lp-world", startOffset:"50%", textAnchor:"middle" },
-          "YOUR MACHINE · NO DATA LEAVES HERE"
-        )
-      ),
-      React.createElement("path", { id:"lp-spoke", d:"M 55,200 A 145,145 0 0,1 345,200", fill:"none" }),
-      React.createElement("text", { fontSize:8, fill:P.inkDim, letterSpacing:2 },
-        React.createElement("textPath", { href:"#lp-spoke", startOffset:"50%", textAnchor:"middle" },
-          "CHAT SPOKE · IMPORT · SIGN"
-        )
-      ),
-      React.createElement("path", { id:"lp-core", d:"M 95,200 A 105,105 0 0,1 305,200", fill:"none" }),
-      React.createElement("text", { fontSize:8, fill:"rgba(26,20,16,0.5)", letterSpacing:2 },
-        React.createElement("textPath", { href:"#lp-core", startOffset:"50%", textAnchor:"middle" },
-          "AXM-CORE · INDEX · DISTILL · SPECTRA"
-        )
-      )
-    ),
-    React.createElement("text", {
-      x:200, y:196, textAnchor:"middle",
-      fontFamily:"'DM Serif Display',serif", fontSize:10,
-      fill:"rgba(255,255,255,0.9)", letterSpacing:1, pointerEvents:"none"
-    }, shardCount > 0 ? `${shardCount} SHARDS` : "NO SHARDS"),
-    React.createElement("text", {
-      x:200, y:209, textAnchor:"middle",
-      fontFamily:"'DM Mono',monospace", fontSize:7,
-      fill:"rgba(180,200,240,0.7)", letterSpacing:1, pointerEvents:"none"
-    }, shardCount > 0 ? "verified · local" : "waiting..."),
-    mode && React.createElement("circle", {
-      cx:200, cy:200, r:pulseR[mode],
-      fill:"none", stroke:pulseColor[mode], strokeWidth:8,
-      style:{ animation:"axm-pulse 2s ease-in-out infinite" },
-      pointerEvents:"none"
-    })
-  );
-}
 
 // ─── Demo Banner ─────────────────────────────────────────────────
 function DemoBanner({ serverOk }) {
   if (serverOk) return null;
   return React.createElement("div", {
     style:{
-      display:"flex", alignItems:"center", gap:10,
-      padding:"10px 14px", marginBottom:20,
-      background:P.paperDeep, border:`1px solid ${P.rule}`,
-      borderRadius:3, fontSize:12, fontFamily:"'DM Mono',monospace", color:P.inkFaint
+      display:"flex", alignItems:"center", gap:12,
+      padding:"10px 16px", marginBottom:24,
+      background:D.raised, border:`1px solid ${D.border}`,
+      borderRadius:4, fontSize:12, fontFamily:"'DM Mono',monospace", color:D.dim,
+      letterSpacing:"0.04em"
     }
   },
-    React.createElement("span", { style:{color:P.gold} }, "◈"),
+    React.createElement("span", { style:{color:D.gold, fontSize:14, opacity:0.7} }, "◈"),
     React.createElement("span", null,
       "Demo simulation — data shown is AXM's own architecture decisions. ",
-      React.createElement("span", { style:{color:P.inkFaint} }, "Start axm-core locally to use real exports.")
+      React.createElement("span", { style:{color:D.faint} }, "Start axm-core locally to use real exports.")
     )
   );
 }
 
 // ─── Shared UI ────────────────────────────────────────────────────
 const inputStyle = {
-  background: P.paperMid, border:`1px solid ${P.rule}`, borderRadius:3,
-  padding:"9px 12px", color:P.ink, fontSize:13,
-  fontFamily:"'DM Mono',monospace", outline:"none", width:"100%", boxSizing:"border-box"
+  background: D.raised, border:`1px solid ${D.border}`, borderRadius:3,
+  padding:"10px 14px", color:D.text, fontSize:14,
+  fontFamily:"'DM Mono',monospace", outline:"none", width:"100%", boxSizing:"border-box",
 };
 
 function Btn({ children, onClick, primary, disabled }) {
   return React.createElement("button", {
     onClick, disabled,
     style:{
-      padding:"9px 20px",
-      background: primary ? P.gold : "transparent",
-      color: primary ? P.paper : P.inkFaint,
-      border:`1px solid ${primary ? P.gold : P.rule}`,
-      borderRadius:4, fontSize:12,
+      padding: primary ? "11px 24px" : "10px 20px",
+      background: primary ? D.gold : "transparent",
+      color: primary ? D.dark : D.dim,
+      border:`1px solid ${primary ? D.gold : D.border}`,
+      borderRadius:3, fontSize:13,
       fontFamily:"'DM Mono',monospace", fontWeight:600,
       cursor: disabled?"not-allowed":"pointer",
-      opacity: disabled?0.4:1, transition:"all 0.15s", letterSpacing:0.5
+      opacity: disabled?0.35:1,
+      transition:"all 0.15s", letterSpacing:"0.06em"
     }
   }, children);
 }
@@ -479,57 +1089,65 @@ function ImportMode({ onImported, serverOk }) {
     const files = fileRef.current?.files;
     if (!files?.length && _backendUrl) return;
     setStatus("importing"); setLog([]);
-
     if (!_backendUrl) {
-      addLog("── simulated run (no backend) ──");
-      await delay(200); addLog("axm-chat import ./axm_chat_conversations.json");
-      await delay(400); addLog("  ✓ shard 1/3  ·  22 claims  ·  chat_spoke_design_d4e5f6", "pass");
-      await delay(300); addLog("  ✓ shard 2/3  ·  19 claims  ·  chat_spectra_design_g7h8i9", "pass");
-      await delay(300); addLog("  ✓ shard 3/3  ·  34 claims  ·  chat_kernel_design_a1b2c3", "pass");
-      await delay(200); addLog("Signed with ML-DSA-44  ·  merkle root verified");
-      addLog("✓ 3 shards → ~/.axm/shards/", "pass");
-      setStatus("done");
-      if (onImported) onImported();
-      return;
+      addLog("axm-chat import ./axm_chat_conversations.json");
+      addLog("─────────────────────────────────────────────────");
+      await delay(280); addLog("[ 1/3 ]  axm architecture — kernel design");
+      await delay(180); addLog("         claims: 34  ·  entities: 12");
+      await delay(120); addLog("         merkle: blake3:e30deb2381…dcee21", "pass");
+      await delay(100); addLog("         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes", "pass");
+      await delay(120); addLog("         → shard_a1b2c3  SEALED ✓", "pass");
+      await delay(220); addLog("[ 2/3 ]  axm-chat — spoke design conversations");
+      await delay(180); addLog("         claims: 22  ·  entities: 8");
+      await delay(120); addLog("         merkle: blake3:7db1e326e5…0b7d3", "pass");
+      await delay(100); addLog("         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes", "pass");
+      await delay(120); addLog("         → shard_d4e5f6  SEALED ✓", "pass");
+      await delay(220); addLog("[ 3/3 ]  axm-core — Spectra query engine");
+      await delay(180); addLog("         claims: 19  ·  entities: 7");
+      await delay(120); addLog("         merkle: blake3:0a5beabfcf…3165", "pass");
+      await delay(100); addLog("         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes", "pass");
+      await delay(120); addLog("         → shard_g7h8i9  SEALED ✓", "pass");
+      await delay(200); addLog("─────────────────────────────────────────────────");
+      await delay(100); addLog("3 shards compiled  ·  75 claims  ·  ~/.axm/shards/", "pass");
+      setStatus("done"); if (onImported) onImported(); return;
     }
-
     const fd = new FormData();
     for (let f of files) fd.append("files", f);
     try {
       const data = await fetch(`${_backendUrl}/import`,{method:"POST",body:fd}).then(r=>r.json());
-      setStatus("done");
-      (data.log||[]).forEach(l=>addLog(l));
-      if (onImported) onImported();
+      setStatus("done"); (data.log||[]).forEach(l=>addLog(l)); if (onImported) onImported();
     } catch(e) { setStatus("error"); addLog(`Error: ${e.message}`,"error"); }
   }, [onImported]);
 
+  const logColor = { pass:D.pass, error:D.fail, info:D.dim };
+
   return React.createElement("div", { className:"app-fade", style:{display:"flex",flexDirection:"column",height:"100%"} },
     React.createElement(DemoBanner, { serverOk }),
-    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:26,fontWeight:300,color:P.ink,marginBottom:8} }, "Import Conversations"),
-    React.createElement("p", { style:{color:P.inkDim,fontSize:14,marginBottom:24,lineHeight:1.6} },
-      "Drop your Claude or ChatGPT export. ZIP or JSON. One cryptographically signed shard per conversation."
+    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:28,fontWeight:300,color:D.text,marginBottom:10,letterSpacing:"-0.01em"} }, "Import Conversations"),
+    React.createElement("p", { style:{color:D.dim,fontSize:15,marginBottom:28,lineHeight:1.65,fontFamily:"'DM Mono',monospace"} },
+      "Drop your Claude or ChatGPT export. ZIP or JSON. One signed shard per conversation."
     ),
     React.createElement("div", {
-      style:{border:`2px dashed ${P.rule}`,borderRadius:6,padding:"32px 20px",textAlign:"center",cursor:"pointer",marginBottom:20,background:P.paperMid,opacity:serverOk?1:0.5},
+      style:{border:`1px dashed ${D.border}`,borderRadius:6,padding:"36px 24px",textAlign:"center",cursor:"pointer",marginBottom:22,background:D.raised,opacity:serverOk?1:0.5,transition:"border-color 0.2s"},
       onClick:()=>{ if(serverOk) fileRef.current?.click(); }
     },
       React.createElement("input", { ref:fileRef, type:"file", multiple:true, accept:".json,.zip", style:{display:"none"}, onChange:()=>setStatus(null) }),
-      React.createElement("div", { style:{fontSize:24,marginBottom:8,color:P.inkFaint} }, "↓"),
-      React.createElement("div", { style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:P.inkFaint,marginBottom:4} },
+      React.createElement("div", { style:{fontSize:20,marginBottom:10,color:D.faint} }, "↓"),
+      React.createElement("div", { style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:D.dim,marginBottom:4,letterSpacing:"0.06em"} },
         serverOk
           ? (fileRef.current?.files?.length ? `${fileRef.current.files.length} file(s) selected` : "click to select export files")
           : "file upload requires axm-core running locally"
       )
     ),
-    React.createElement("div", { style:{display:"flex",gap:12,marginBottom:16} },
+    React.createElement("div", { style:{display:"flex",gap:14,marginBottom:20} },
       React.createElement(Btn, { primary:true, onClick:handleImport, disabled:status==="importing" },
         status==="importing" ? "Importing…" : "Compile Shards"
       )
     ),
     log.length > 0 && React.createElement("div", {
       ref:logRef,
-      style:{padding:16,background:P.paperDeep,border:`1px solid ${P.rule}`,borderRadius:4,maxHeight:180,overflow:"auto",fontFamily:"'DM Mono',monospace",fontSize:11.5,lineHeight:1.7}
-    }, log.map(l=>React.createElement("div",{key:l.id,style:{color:l.type==="pass"?P.pass:P.inkDim}},l.msg)))
+      style:{padding:16,background:D.dark,border:`1px solid ${D.border}`,borderRadius:4,maxHeight:200,overflow:"auto",fontFamily:"'DM Mono',monospace",fontSize:12,lineHeight:1.8}
+    }, log.map(l=>React.createElement("div",{key:l.id,style:{color:logColor[l.type]||logColor.info}},l.msg)))
   );
 }
 
@@ -543,17 +1161,32 @@ function DistillMode({ shards, onDistilled, serverOk }) {
 
   React.useEffect(()=>{ if(logRef.current) logRef.current.scrollTop=logRef.current.scrollHeight; },[log]);
   const addLog = (msg,type="info") => setLog(p=>[...p,{msg,type,id:Date.now()+Math.random()}]);
+  const logColor = { pass:D.pass, error:D.fail, info:D.dim };
 
   const handleDistill = React.useCallback(async () => {
     setStatus("running"); setDecisions([]); setLog([]);
     if (!_backendUrl) {
-      addLog("axm-chat distill — demo mode");
-      await delay(200); addLog("Pass 1: indexing episodes via Ollama (Mistral)…");
+      addLog("axm-chat distill  (Mistral · local · no data leaves machine)");
+      addLog("─────────────────────────────────────────────────────────────");
+      await delay(250); addLog("Pass 1 / episodic index…");
+      await delay(300); addLog("  topics: cryptography, protocol design, deployment");
+      await delay(200); addLog("  tools: blake3, duckdb, nacl, dilithium-py");
+      await delay(200); addLog("  state: architecture → implementation → testing");
+      await delay(200); addLog("Pass 2 / engineering lens…");
+      await delay(350); addLog("  problem:   how to make knowledge tamper-evident without a server");
+      await delay(250); addLog("  graveyard: mutable manifest · runtime re-signing · S3 with encryption");
+      await delay(200); addLog("  solution:  BLAKE3 Merkle + ML-DSA-44 · compiled once · verified offline");
+      await delay(200); addLog("  rule:      the kernel never re-signs; spokes never touch the Merkle root");
+      await delay(250); addLog("Pass 3 / decision extraction (Mistral)…");
       for (let i=0; i<DEMO_DECISIONS.length; i++) {
-        await delay(350);
-        addLog(`  [${DEMO_DECISIONS[i].predicate.toUpperCase()}] ${DEMO_DECISIONS[i].subject}`, "pass");
+        await delay(380);
+        const d = DEMO_DECISIONS[i];
+        addLog(`  [${d.predicate.toUpperCase()}]  ${d.subject} → ${d.object}`, d.predicate === "rejected" ? "error" : "pass");
       }
-      await delay(300); addLog("✓ Decision shard sealed and signed", "pass");
+      await delay(250); addLog("─────────────────────────────────────────────────────────────");
+      await delay(150); addLog("ext/engineering@1.parquet  written", "pass");
+      await delay(100); addLog("ext/episodes@1.parquet     written", "pass");
+      await delay(100); addLog("Merkle recomputed  ·  shard resealed  ·  signed ML-DSA-44 ✓", "pass");
       setDecisions(DEMO_DECISIONS); setStatus("done"); return;
     }
     try {
@@ -566,47 +1199,56 @@ function DistillMode({ shards, onDistilled, serverOk }) {
     } catch(e) { setStatus("error"); addLog(`Error: ${e.message}`,"error"); }
   }, [selected, onDistilled]);
 
+  const predColor = p => p === "rejected" || p === "abandoned" ? D.fail : D.pass;
+
   return React.createElement("div", { className:"app-fade", style:{display:"flex",flexDirection:"column",height:"100%"} },
     React.createElement(DemoBanner, { serverOk }),
-    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:26,fontWeight:300,color:P.ink,marginBottom:8} }, "Distill Decisions"),
-    React.createElement("p", { style:{color:P.inkDim,fontSize:14,marginBottom:24,lineHeight:1.6} },
-      "Extract structured decisions from a conversation shard using a local LLM. Produces a compact, signed decision shard."
+    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:28,fontWeight:300,color:D.text,marginBottom:10,letterSpacing:"-0.01em"} }, "Distill Decisions"),
+    React.createElement("p", { style:{color:D.dim,fontSize:15,marginBottom:28,lineHeight:1.65,fontFamily:"'DM Mono',monospace"} },
+      "Three passes: episodic index, lens extraction, decision compilation. Produces a compact signed shard."
     ),
     React.createElement("div", { style:{marginBottom:20} },
-      React.createElement("select", { value:selected||"", onChange:e=>setSelected(e.target.value||null), style:{...inputStyle} },
+      React.createElement("select", { value:selected||"", onChange:e=>setSelected(e.target.value||null),
+        style:{...inputStyle} },
         React.createElement("option", {value:""}, "Select a conversation shard…"),
         ...shards.filter(s=>!s.is_decision).map((s,i)=>
           React.createElement("option", {key:i,value:s.name}, `${s.title||s.name} (${s.claims} claims)`)
         )
       )
     ),
-    React.createElement("div", { style:{display:"flex",gap:12,marginBottom:20} },
+    React.createElement("div", { style:{display:"flex",gap:14,marginBottom:24} },
       React.createElement(Btn, { primary:true, onClick:handleDistill, disabled:status==="running" },
         status==="running" ? "Extracting…" : "Distill & Compile"
       )
     ),
     log.length>0 && decisions.length===0 && React.createElement("div", {
       ref:logRef,
-      style:{padding:16,background:P.paperDeep,borderRadius:4,fontFamily:"'DM Mono',monospace",fontSize:11.5,lineHeight:1.7}
-    }, log.map(l=>React.createElement("div",{key:l.id,style:{color:l.type==="pass"?P.pass:P.inkDim}},l.msg))),
+      style:{padding:16,background:D.dark,border:`1px solid ${D.border}`,borderRadius:4,fontFamily:"'DM Mono',monospace",fontSize:12,lineHeight:1.8,marginBottom:20}
+    }, log.map(l=>React.createElement("div",{key:l.id,style:{color:logColor[l.type]||logColor.info}},l.msg))),
     decisions.length>0 && React.createElement("div", { style:{flex:1,overflowY:"auto"} },
       decisions.map((d,i)=>React.createElement("div", {
         key:i,
-        style:{padding:16,background:P.paperMid,border:`1px solid ${P.rule}`,borderRadius:4,marginBottom:12}
+        style:{padding:16,background:D.raised,border:`1px solid ${D.border}`,borderRadius:4,marginBottom:10}
       },
         React.createElement("div", {style:{display:"flex",alignItems:"center",gap:10,marginBottom:8,flexWrap:"wrap"}},
-          React.createElement("span", {style:{padding:"2px 8px",borderRadius:3,fontSize:10,fontFamily:"'DM Mono',monospace",background:d.predicate==="adopted"?"#d6cfc0":"#e0d8cc",color:d.predicate==="adopted"?P.pass:P.fail,textTransform:"uppercase"}}, d.predicate),
-          React.createElement("span", {style:{fontFamily:"'DM Serif Display',serif",fontSize:15,color:P.ink}}, d.subject),
-          React.createElement("span", {style:{color:P.inkFaint}}, "→"),
-          React.createElement("span", {style:{fontSize:13,color:P.inkDim}}, d.object)
+          React.createElement("span", {style:{padding:"2px 8px",borderRadius:2,fontSize:10,fontFamily:"'DM Mono',monospace",
+            background: d.predicate==="rejected" ? "rgba(192,80,64,0.15)" : "rgba(90,144,96,0.15)",
+            color:predColor(d.predicate),textTransform:"uppercase",letterSpacing:"0.08em",fontWeight:600}}, d.predicate),
+          React.createElement("span", {style:{fontFamily:"'Spectral',serif",fontSize:16,color:D.text}}, d.subject),
+          React.createElement("span", {style:{color:D.faint,fontSize:13}},"→"),
+          React.createElement("span", {style:{fontSize:13,color:D.dim}}, d.object)
         ),
-        React.createElement("div", {style:{fontSize:13,color:P.inkFaint,lineHeight:1.6}}, d.reasoning)
+        React.createElement("div", {style:{fontSize:13,color:D.faint,lineHeight:1.65,fontFamily:"'DM Mono',monospace",marginBottom: d.graveyard?.length ? 10 : 0}}, d.reasoning),
+        d.graveyard?.length && React.createElement("div", {style:{borderTop:`1px solid ${D.border}`,paddingTop:10,marginTop:2}},
+          React.createElement("div",{style:{fontSize:10,letterSpacing:"0.14em",color:D.faint,fontFamily:"'DM Mono',monospace",marginBottom:6,textTransform:"uppercase"}}, "graveyard"),
+          d.graveyard.map((g,gi)=>React.createElement("div",{key:gi,style:{fontSize:12,color:D.fail,fontFamily:"'DM Mono',monospace",lineHeight:1.7,opacity:0.8}},`✗ ${g}`))
+        )
       ))
     )
   );
 }
 
-// ─── Mode: Query ──────────────────────────────────────────────────
+// ─── Mode: Query ─────────────────────────────────────────────────
 function QueryMode({ serverOk }) {
   const [q,       setQ]       = React.useState("");
   const [res,     setRes]     = React.useState(null);
@@ -617,7 +1259,8 @@ function QueryMode({ serverOk }) {
     setLoading(true); setRes(null);
     await delay(!_backendUrl ? 400 : 0);
     if (!_backendUrl) {
-      setRes(DEMO_QUERY_RESULTS[query === "what decisions have we made" ? query : "default"]);
+      const key = Object.keys(DEMO_QUERY_RESULTS).find(k => query.toLowerCase().includes(k.split(" ").slice(0,3).join(" "))) || "default";
+      setRes(DEMO_QUERY_RESULTS[key] || DEMO_QUERY_RESULTS["default"]);
       setLoading(false); return;
     }
     try {
@@ -630,42 +1273,57 @@ function QueryMode({ serverOk }) {
     finally { setLoading(false); }
   },[]);
 
+  const suggestions = ["what decisions have we made","what failed before we solved the merkle problem","what changed since january"];
+
   return React.createElement("div", { className:"app-fade", style:{display:"flex",flexDirection:"column",height:"100%"} },
     React.createElement(DemoBanner, { serverOk }),
-    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:26,fontWeight:300,color:P.ink,marginBottom:8} }, "Query Knowledge"),
-    React.createElement("p", { style:{color:P.inkDim,fontSize:14,marginBottom:24,lineHeight:1.6} },
-      "Natural language to DuckDB SQL. Runs locally against all mounted shards. No LLM required at query time."
+    React.createElement("h2", { style:{fontFamily:"'Spectral',serif",fontSize:28,fontWeight:300,color:D.text,marginBottom:10,letterSpacing:"-0.01em"} }, "Query Knowledge"),
+    React.createElement("p", { style:{color:D.dim,fontSize:15,marginBottom:24,lineHeight:1.65,fontFamily:"'DM Mono',monospace"} },
+      "Natural language → DuckDB SQL. Runs locally against all mounted shards. No LLM at query time."
     ),
-    React.createElement("div", { style:{display:"flex",gap:10,marginBottom:16} },
+    React.createElement("div", { style:{display:"flex",gap:10,marginBottom:14} },
       React.createElement("input", {
         value:q, onChange:e=>setQ(e.target.value),
         onKeyDown:e=>e.key==="Enter"&&runQuery(q),
         placeholder:"what did we decide about…",
-        style:{...inputStyle,flex:1,fontSize:14}
+        style:{...inputStyle,flex:1}
       }),
       React.createElement(Btn, { primary:true, onClick:()=>runQuery(q), disabled:loading||!q.trim() }, loading?"…":"Ask")
     ),
-    React.createElement("div", { style:{display:"flex",gap:8,marginBottom:24,flexWrap:"wrap"} },
-      ["what decisions have we made","timeline of choices"].map((s,i)=>
+    React.createElement("div", { style:{display:"flex",gap:8,marginBottom:28,flexWrap:"wrap"} },
+      suggestions.map((s,i)=>
         React.createElement("button", {
           key:i, onClick:()=>{setQ(s);runQuery(s);},
-          style:{padding:"5px 12px",background:P.paperMid,border:`1px solid ${P.rule}`,borderRadius:16,fontSize:11,fontFamily:"'DM Mono',monospace",cursor:"pointer",color:P.inkFaint}
+          style:{padding:"5px 12px",background:D.raised,border:`1px solid ${D.border}`,borderRadius:14,
+            fontSize:11,fontFamily:"'DM Mono',monospace",cursor:"pointer",color:D.faint,
+            letterSpacing:"0.04em",transition:"all 0.15s"}
         }, s)
       )
     ),
     res?.sql && React.createElement("div", {
-      style:{padding:16,background:P.paperDeep,borderRadius:4,fontFamily:"'DM Mono',monospace",fontSize:11,color:P.inkDim,whiteSpace:"pre-wrap",marginBottom:16}
+      style:{padding:14,background:D.raised,borderRadius:4,fontFamily:"'DM Mono',monospace",
+        fontSize:12,color:D.faint,whiteSpace:"pre-wrap",marginBottom:12,
+        border:`1px solid ${D.border}`}
     }, res.sql),
-    res?.rows?.length > 0 && React.createElement("div", { style:{overflow:"auto",border:`1px solid ${P.rule}`,borderRadius:4} },
-      React.createElement("table", { style:{width:"100%",borderCollapse:"collapse",fontFamily:"'DM Mono',monospace",fontSize:12} },
+    res?.note && React.createElement("div", {
+      style:{padding:"8px 14px",marginBottom:16,fontFamily:"'DM Mono',monospace",fontSize:11,
+        color:D.pass, letterSpacing:"0.04em", borderLeft:`2px solid ${D.pass}`,
+        background:"rgba(58,96,48,0.06)"}
+    }, `↳ ${res.note}`),
+    res?.rows?.length > 0 && React.createElement("div", { style:{overflow:"auto",border:`1px solid ${D.border}`,borderRadius:4} },
+      React.createElement("table", { style:{width:"100%",borderCollapse:"collapse",fontFamily:"'DM Mono',monospace",fontSize:13} },
         React.createElement("thead", null,
-          React.createElement("tr", { style:{background:P.paperDeep,borderBottom:`1px solid ${P.rule}`} },
-            res.columns.map((c,i)=>React.createElement("th",{key:i,style:{padding:"10px 14px",textAlign:"left",color:P.inkFaint,fontWeight:500,textTransform:"uppercase",fontSize:10}},c))
+          React.createElement("tr", { style:{background:D.raised,borderBottom:`1px solid ${D.border}`} },
+            res.columns.map((c,i)=>React.createElement("th",{key:i,
+              style:{padding:"10px 16px",textAlign:"left",color:D.faint,fontWeight:500,
+                textTransform:"uppercase",fontSize:10,letterSpacing:"0.14em"}},c))
           )
         ),
         React.createElement("tbody", null,
-          res.rows.map((r,i)=>React.createElement("tr",{key:i,style:{borderBottom:`1px solid ${P.rule}`}},
-            r.map((c,j)=>React.createElement("td",{key:j,style:{padding:"10px 14px",color:P.inkDim}},c))
+          res.rows.map((r,i)=>React.createElement("tr",{key:i,
+            style:{borderBottom:`1px solid ${D.border}`}},
+            r.map((c,j)=>React.createElement("td",{key:j,
+              style:{padding:"10px 16px",color:D.dim}},c))
           ))
         )
       )
@@ -673,7 +1331,7 @@ function QueryMode({ serverOk }) {
   );
 }
 
-// ─── Root App ─────────────────────────────────────────────────────
+// ─── Root App ────────────────────────────────────────────────────
 function AXMChatApp() {
   const [mode,     setMode]     = React.useState(null);
   const [shards,   setShards]   = React.useState(DEMO_SHARDS);
@@ -692,61 +1350,52 @@ function AXMChatApp() {
     return ()=>clearInterval(iv);
   },[]);
 
+  const stepDesc = [
+    { m:"import",  num:"Pass 1 · No LLM",    title:"Import",  desc:"One signed shard per conversation. BLAKE3 Merkle, ML-DSA-44." },
+    { m:"distill", num:"Pass 2 · Local LLM",  title:"Distill", desc:"Three passes: episodic index, lens extraction, decision shard." },
+    { m:"query",   num:"Query · DuckDB",       title:"Ask",     desc:"Natural language to SQL. No LLM at query time." },
+  ];
+
   return React.createElement(React.Fragment, null,
     React.createElement("style", null, `
-      @keyframes axm-pulse { 0%,100%{opacity:0.4;transform:scale(1);} 50%{opacity:0.9;transform:scale(1.04);} }
-      #axm-chat-app select option { background:${P.paper}; color:${P.ink}; }
-      #axm-chat-app ::-webkit-scrollbar { width:6px; height:6px; }
-      #axm-chat-app ::-webkit-scrollbar-track { background:transparent; }
-      #axm-chat-app ::-webkit-scrollbar-thumb { background:${P.rule}; border-radius:3px; }
+      #axm-chat-app select { appearance:none; }
+      #axm-chat-app select option { background:#181410; color:#c8b890; }
     `),
 
-    // 1. PIPELINE NAVIGATION — click to open demo
     React.createElement("div", { className:"pipeline-nav" },
-      [
-        { m:"import",  num:"Pass 1 · No LLM",   title:"Import",  desc:"One signed shard per conversation. BLAKE3 Merkle tree, ML-DSA-44 signature." },
-        { m:"distill", num:"Pass 2 · Local LLM", title:"Distill", desc:"Ollama indexes episodes, extracts decisions, enriches by lens." },
-        { m:"query",   num:"Query · DuckDB",      title:"Ask",     desc:"SQL pattern matching over Parquet." },
-      ].map(step => React.createElement("div", {
+      stepDesc.map(step => React.createElement("div", {
         key: step.m,
         className: `pipeline-step ${mode === step.m ? "active" : ""}`,
         onClick: () => {
-          const next = mode === step.m ? null : step.m;
-          setMode(next);
-          if (next) {
-            setTimeout(() => {
-              const el = document.getElementById('pipeline-demo-panel');
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
+          const isOpening = mode !== step.m;
+          setMode(isOpening ? step.m : null);
+          if (isOpening) {
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                const nav = document.querySelector(".pipeline-nav");
+                if (nav) {
+                  const y = nav.getBoundingClientRect().top + window.scrollY - 24;
+                  window.scrollTo({ top: y, behavior: "smooth" });
+                }
+              }, 50);
+            });
           }
         }
       },
-        React.createElement("div", { className:"step-num" },   step.num),
+        React.createElement("div", { className:"step-num" },
+          step.num,
+          React.createElement("span", { className:"step-check" }, " ▾")
+        ),
         React.createElement("div", { className:"step-title" }, step.title),
-        React.createElement("div", { className:"step-body" },  step.desc)
+        React.createElement("div", { className:"step-body" }, step.desc)
       ))
     ),
 
-    // 2. DEMO PANEL — appears when a pipeline step is clicked
     mode && React.createElement("div", { id:"pipeline-demo-panel", className:"app-layout app-fade" },
-      // Left: interactive tools
-      React.createElement("div", { className:"app-main" },
-        React.createElement("div", { className:"app-scroll-area" },
-          mode === "import"  && React.createElement(ImportMode,  { onImported:()=>{}, serverOk }),
-          mode === "distill" && React.createElement(DistillMode, { shards, onDistilled:()=>{}, serverOk }),
-          mode === "query"   && React.createElement(QueryMode,   { serverOk })
-        )
-      ),
-      // Right: Glass Onion as architecture telemetry
-      React.createElement("div", { className:"app-sidebar" },
-        React.createElement(GlassOnion, { mode, shardCount:shards.length }),
-        React.createElement("div", {
-          style:{marginTop:20,textAlign:"center",fontSize:12,color:P.inkFaint,fontFamily:"'DM Mono',monospace",letterSpacing:0.5}
-        },
-          serverOk
-            ? React.createElement("span", {style:{color:P.pass}}, "● Connected to axm-core")
-            : "● Running Demo Simulation"
-        )
+      React.createElement("div", { className:"app-scroll-area" },
+        mode === "import"  && React.createElement(ImportMode,  { onImported:()=>{}, serverOk }),
+        mode === "distill" && React.createElement(DistillMode, { shards, onDistilled:()=>{}, serverOk }),
+        mode === "query"   && React.createElement(QueryMode,   { serverOk })
       )
     )
   );
@@ -755,6 +1404,5 @@ function AXMChatApp() {
 const root = ReactDOM.createRoot(document.getElementById("axm-chat-app"));
 root.render(React.createElement(AXMChatApp));
 </script>
-
 </body>
 </html>
