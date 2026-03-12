@@ -44,11 +44,14 @@
       overflow-x: hidden;
     }
 
+    /* grain overlay — inline SVG, no external fetch */
     body::after {
       content: '';
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 9000;
+      pointer-events: none;
+      z-index: 9000;
     }
 
     .page { max-width: 1160px; margin: 0 auto; padding: 0 52px; }
@@ -84,8 +87,8 @@
       position: relative; overflow: hidden;
     }
     .hero::before {
-      content: ''; position: absolute; top: 20%; left: 50%;
-      transform: translateX(-50%); width: 900px; height: 500px;
+      content: ''; position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 500px;
       background: radial-gradient(ellipse, rgba(200,168,75,0.07) 0%, transparent 65%);
       pointer-events: none;
     }
@@ -94,10 +97,9 @@
       to   { opacity: 1; transform: translateY(0); }
     }
     .kicker {
-      font-family: 'DM Mono', monospace; font-size: 10.5px;
-      letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold);
-      margin-bottom: 40px; opacity: 0;
-      animation: riseUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) forwards;
+      font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 0.24em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 40px;
+      opacity: 0; animation: riseUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) forwards;
     }
     h1 {
       font-family: 'Spectral', serif; font-size: clamp(46px, 6.4vw, 76px);
@@ -129,10 +131,9 @@
       opacity: 0; animation: riseUp 0.7s 0.54s cubic-bezier(0.16,1,0.3,1) forwards;
     }
     .btn-primary {
-      display: inline-block; padding: 13px 36px; background: var(--ink);
-      color: var(--paper); font-family: 'DM Mono', monospace; font-size: 12px;
-      letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none;
-      border: none; cursor: pointer;
+      display: inline-block; padding: 13px 36px; background: var(--ink); color: var(--paper);
+      font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.14em;
+      text-transform: uppercase; text-decoration: none; border: none; cursor: pointer;
       transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
       border-radius: 3px; box-shadow: 0 2px 16px rgba(26,20,16,0.18);
     }
@@ -148,9 +149,9 @@
     /* ── SECTIONS ── */
     .rule-section { border-top: 1px solid var(--rule); padding: 96px 0; }
     .section-label {
-      font-family: 'DM Mono', monospace; font-size: 10.5px;
-      letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-faint);
-      margin-bottom: 60px; display: flex; align-items: center; gap: 14px;
+      font-family: 'DM Mono', monospace; font-size: 10.5px; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--ink-faint); margin-bottom: 60px;
+      display: flex; align-items: center; gap: 14px;
     }
     .section-label .n { color: var(--gold-bright); opacity: 0.7; }
     .section-label::after { content: ''; display: block; width: 40px; height: 1px; background: var(--rule-strong); }
@@ -164,7 +165,7 @@
     .problem-text p { color: var(--ink-dim); margin-bottom: 22px; font-size: 18px; line-height: 1.78; }
     .graveyard-callout {
       margin-top: 32px; padding: 24px 28px;
-      border-left: 2px solid var(--gold-bright); background: var(--paper-warm);
+      border-left: 2px solid var(--gold-bright); background: var(--paper-warm); position: relative;
     }
     .graveyard-callout::before {
       content: 'FROM THE DISTILL ENGINE'; display: block;
@@ -189,7 +190,7 @@
       font-weight: 400; font-style: italic; color: var(--ink); margin-bottom: 20px; line-height: 1.35;
     }
     .thesis-box p { font-size: 17px; color: var(--ink-dim); line-height: 1.72; margin-bottom: 0; }
-    .thesis-box code, .shard-grid code {
+    .thesis-box code {
       font-family: 'DM Mono', monospace; font-size: 13px; background: var(--code-bg);
       padding: 2px 7px; border-radius: 2px; border: 1px solid var(--rule-strong);
     }
@@ -201,15 +202,16 @@
       border: 1px solid var(--rule-strong); border-bottom: none;
     }
     .pipeline-step {
-      background: var(--paper-warm); padding: 40px 36px 34px;
-      cursor: pointer; transition: background 0.2s; position: relative;
+      background: var(--paper-warm); padding: 40px 36px 34px; cursor: pointer;
+      transition: background 0.2s; position: relative;
       border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule-strong);
       user-select: none;
     }
     .pipeline-step:last-child { border-right: none; }
     .pipeline-step:hover { background: var(--paper-deep); }
     .pipeline-step.active {
-      background: var(--paper-deep); border-bottom: 1px solid var(--paper-deep);
+      background: var(--paper-deep);
+      border-bottom-color: var(--paper-deep);
       margin-bottom: -1px; z-index: 10;
     }
     .pipeline-step.active::after {
@@ -219,93 +221,102 @@
     .pipeline-step.active .step-num { color: var(--gold); }
     .pipeline-step.active .step-check { opacity: 1; }
     .step-check { display: inline-block; margin-left: 8px; color: var(--gold); font-size: 11px; opacity: 0; transition: opacity 0.2s; }
-    .step-num {
-      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em;
-      color: var(--gold); margin-bottom: 14px; text-transform: uppercase;
-    }
-    .step-title {
-      font-family: 'Spectral', serif; font-size: 27px; font-weight: 400;
-      color: var(--ink); margin-bottom: 10px; letter-spacing: -0.01em;
-    }
+    .step-num { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; color: var(--gold); margin-bottom: 14px; text-transform: uppercase; }
+    .step-title { font-family: 'Spectral', serif; font-size: 27px; font-weight: 400; color: var(--ink); margin-bottom: 10px; letter-spacing: -0.01em; }
     .step-body { font-size: 15.5px; color: var(--ink-dim); line-height: 1.65; }
 
     /* ── DEMO PANEL ── */
     .pipeline-panel {
       border: 1px solid var(--rule-strong); border-top: none;
       background: var(--paper-warm); border-radius: 0 0 6px 6px;
+      display: none;
     }
+    .pipeline-panel.open { display: block; }
     .panel-body { padding: 44px 48px; }
     @keyframes panelIn {
       from { opacity: 0; transform: translateY(-8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .panel-fade { animation: panelIn 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+
     .demo-banner {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 16px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin-bottom: 24px;
       background: var(--paper-deep); border: 1px solid var(--rule-strong); border-radius: 4px;
       font-size: 12px; font-family: 'DM Mono', monospace; color: var(--ink-dim); letter-spacing: 0.04em;
     }
     .demo-banner-gem { color: var(--gold); font-size: 14px; opacity: 0.7; }
-    .panel-title {
+    .panel-h2 {
       font-family: 'Spectral', serif; font-size: 28px; font-weight: 300;
       color: var(--ink); margin-bottom: 10px; letter-spacing: -0.01em;
     }
     .panel-sub { color: var(--ink-dim); font-size: 15px; margin-bottom: 28px; line-height: 1.65; font-family: 'DM Mono', monospace; }
+
+    /* drop zone */
     .drop-zone {
-      border: 1px dashed var(--rule-strong); border-radius: 6px;
-      padding: 36px 24px; text-align: center;
-      margin-bottom: 22px; background: var(--paper-deep); opacity: 0.5;
+      border: 1px dashed var(--rule-strong); border-radius: 6px; padding: 36px 24px;
+      text-align: center; margin-bottom: 22px; background: var(--paper-deep); opacity: 0.55;
     }
     .drop-zone-icon { font-size: 20px; margin-bottom: 10px; color: var(--ink-faint); }
     .drop-zone-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink-dim); letter-spacing: 0.06em; }
+
+    /* buttons */
     .demo-btn {
-      padding: 11px 24px; font-family: 'DM Mono', monospace; font-size: 13px;
-      font-weight: 500; letter-spacing: 0.06em; border-radius: 3px; cursor: pointer;
-      transition: all 0.15s; background: var(--ink); color: var(--paper);
-      border: 1px solid var(--ink);
+      padding: 11px 24px; background: var(--ink); color: var(--paper);
+      font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+      letter-spacing: 0.06em; border: none; border-radius: 3px;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
     }
     .demo-btn:hover { background: var(--ink-mid); transform: translateY(-1px); }
     .demo-btn[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* log terminal */
     .log-term {
-      padding: 16px; background: var(--paper); border: 1px solid var(--rule-strong);
-      border-radius: 4px; max-height: 200px; overflow-y: auto;
-      font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; margin-top: 16px;
+      margin-top: 16px; padding: 16px; background: var(--paper);
+      border: 1px solid var(--rule-strong); border-radius: 4px;
+      max-height: 200px; overflow-y: auto;
+      font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8;
     }
     .l-info { color: var(--ink-dim); }
     .l-pass { color: var(--pass); }
     .l-fail { color: var(--fail); }
+
+    /* distill select */
     .d-select {
       width: 100%; background: var(--paper-deep); border: 1px solid var(--rule-strong);
-      border-radius: 3px; padding: 10px 14px; color: var(--ink); font-size: 14px;
-      font-family: 'DM Mono', monospace; outline: none; margin-bottom: 20px; appearance: none;
+      border-radius: 3px; padding: 10px 14px; color: var(--ink);
+      font-size: 14px; font-family: 'DM Mono', monospace; outline: none;
+      margin-bottom: 20px; appearance: none;
     }
+
+    /* decision cards */
     .decision-card { padding: 16px; background: var(--paper-deep); border: 1px solid var(--rule-strong); border-radius: 4px; margin-bottom: 10px; }
     .dc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
     .dc-badge { padding: 2px 8px; border-radius: 2px; font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
-    .dc-badge.adopted  { background: rgba(58,96,48,0.15); color: var(--pass); }
+    .dc-badge.adopted  { background: rgba(58,96,48,0.15);  color: var(--pass); }
     .dc-badge.rejected { background: rgba(160,48,32,0.15); color: var(--fail); }
     .dc-subject { font-family: 'Spectral', serif; font-size: 16px; color: var(--ink); }
     .dc-arrow   { color: var(--ink-faint); font-size: 13px; }
     .dc-object  { font-size: 13px; color: var(--ink-dim); }
-    .dc-reason  { font-size: 13px; color: var(--ink-faint); line-height: 1.65; font-family: 'DM Mono', monospace; margin-bottom: 0; }
+    .dc-reason  { font-size: 13px; color: var(--ink-faint); line-height: 1.65; font-family: 'DM Mono', monospace; }
     .dc-graveyard { border-top: 1px solid var(--rule); padding-top: 10px; margin-top: 8px; }
     .dc-g-label { font-size: 10px; letter-spacing: 0.14em; color: var(--ink-faint); font-family: 'DM Mono', monospace; text-transform: uppercase; margin-bottom: 6px; }
     .dc-g-item  { font-size: 12px; color: var(--fail); font-family: 'DM Mono', monospace; line-height: 1.7; opacity: 0.8; }
+
+    /* query */
     .q-row { display: flex; gap: 10px; margin-bottom: 14px; }
     .q-input {
       flex: 1; background: var(--paper-deep); border: 1px solid var(--rule-strong);
-      border-radius: 3px; padding: 10px 14px; color: var(--ink); font-size: 14px;
-      font-family: 'DM Mono', monospace; outline: none;
+      border-radius: 3px; padding: 10px 14px; color: var(--ink);
+      font-size: 14px; font-family: 'DM Mono', monospace; outline: none;
     }
     .q-input:focus { border-color: var(--gold); }
     .q-ask {
       padding: 10px 20px; font-family: 'DM Mono', monospace; font-size: 13px;
       font-weight: 500; letter-spacing: 0.06em; background: var(--gold); color: var(--paper);
-      border: none; border-radius: 3px; cursor: pointer; transition: all 0.15s;
+      border: none; border-radius: 3px; cursor: pointer; transition: background 0.15s;
     }
     .q-ask:hover { background: var(--ink); }
-    .q-ask[disabled] { opacity: 0.35; cursor: not-allowed; }
+    .q-ask:disabled { opacity: 0.35; cursor: not-allowed; }
     .q-chips { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
     .q-chip {
       padding: 5px 12px; background: var(--paper-deep); border: 1px solid var(--rule-strong);
@@ -334,6 +345,10 @@
     .shard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
     .shard-grid .problem-text h2 { font-size: 28px; }
     .shard-grid .problem-text p  { font-size: 17px; }
+    .shard-grid code {
+      font-family: 'DM Mono', monospace; font-size: 14px; background: var(--code-bg);
+      padding: 2px 7px; border-radius: 2px; border: 1px solid var(--rule-strong);
+    }
     .code-block {
       background: var(--code-bg); border: 1px solid var(--rule-strong);
       border-radius: 4px; padding: 28px 32px; overflow-x: auto;
@@ -350,10 +365,7 @@
     .spec-card { border-top: 1.5px solid var(--ink); padding-top: 22px; }
     .spec-title { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: var(--ink); text-transform: uppercase; margin-bottom: 14px; font-weight: 600; }
     .spec-desc { font-size: 15.5px; color: var(--ink-dim); line-height: 1.65; }
-    .spec-desc code {
-      font-family: 'DM Mono', monospace; font-size: 12.5px; background: var(--code-bg);
-      padding: 1px 5px; border-radius: 2px; border: 1px solid var(--rule-strong);
-    }
+    .spec-desc code { font-family: 'DM Mono', monospace; font-size: 12.5px; background: var(--code-bg); padding: 1px 5px; border-radius: 2px; border: 1px solid var(--rule-strong); }
 
     /* ── INSTALL ── */
     .install-block { background: var(--code-bg); border: 1px solid var(--rule-strong); border-radius: 4px; overflow: hidden; }
@@ -365,7 +377,7 @@
     .install-note { margin-top: 18px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--ink-faint); line-height: 1.8; }
     .install-note code { background: var(--paper-deep); padding: 2px 7px; border-radius: 2px; font-size: 12px; border: 1px solid var(--rule-strong); color: var(--ink-mid); }
 
-    /* ── THREE-LAYER ONION ── */
+    /* ── THREE LAYERS ONION ── */
     .layer-onion-wrap { display: flex; gap: 56px; align-items: center; flex-wrap: wrap; }
     .layer-svg { width: 280px; flex-shrink: 0; cursor: pointer; filter: drop-shadow(0 4px 24px rgba(26,20,16,0.08)); }
     .layer-tabs { display: flex; gap: 8px; margin-bottom: 28px; }
@@ -376,9 +388,9 @@
       border: 1px solid var(--rule-strong); border-radius: 3px;
     }
     .layer-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-    @keyframes lo-fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes lo-pulse  { 0%,100%{opacity:0.3;} 50%{opacity:0.8;} }
-    .layer-detail { animation: lo-fadeIn 0.2s ease both; }
+    @keyframes lo-fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes lo-pulse  { 0%,100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+    .layer-detail { animation: lo-fadeIn 0.2s ease both; flex: 1; min-width: 260px; }
     .layer-detail-meta { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.22em; color: var(--gold); margin-bottom: 8px; text-transform: uppercase; }
     .layer-detail-name { font-family: 'Spectral', serif; font-size: 26px; font-weight: 300; color: var(--ink); margin-bottom: 12px; letter-spacing: -0.01em; line-height: 1.15; }
     .layer-detail-desc { font-size: 16px; color: var(--ink-dim); line-height: 1.72; margin-bottom: 16px; }
@@ -435,13 +447,14 @@
     <div class="kicker">axm-genesis v1.2.0 &nbsp;·&nbsp; axm-chat v0.1.0 &nbsp;·&nbsp; Apache 2.0</div>
     <h1>Your AI conversations<br />as <em>sovereign knowledge</em></h1>
     <p class="hero-thesis">Vector databases are search engines.<br />This is version control for knowledge.</p>
-    <p class="hero-sub">Turn Claude, ChatGPT, and Gemini exports into cryptographically signed, offline-queryable knowledge shards. Your data. Your keys. Your machine.</p>
+    <p class="hero-sub">Turn Claude, ChatGPT, and Gemini exports into cryptographically signed, offline-queryable knowledge shards. Every decision traced. Every claim provable. No cloud required.</p>
     <div class="hero-actions">
       <a href="#install" class="btn-primary">Run it locally</a>
       <a href="#how" class="btn-ghost">View the pipeline</a>
     </div>
   </section>
 
+  <!-- 01 -->
   <section class="rule-section" id="problem">
     <div class="section-label"><span class="n">01</span> The Context Collapse</div>
     <div class="problem-grid">
@@ -461,30 +474,34 @@
     </div>
   </section>
 
+  <!-- 02 -->
   <section class="rule-section" id="how">
     <div class="section-label"><span class="n">02</span> The Pipeline</div>
+
     <div class="pipeline-nav" id="pipeline-nav">
-      <div class="pipeline-step" data-panel="import">
+      <div class="pipeline-step" data-mode="import">
         <div class="step-num">Pass 1 · No LLM<span class="step-check">▾</span></div>
         <div class="step-title">Import</div>
         <div class="step-body">One signed shard per conversation. BLAKE3 Merkle, ML-DSA-44.</div>
       </div>
-      <div class="pipeline-step" data-panel="distill">
+      <div class="pipeline-step" data-mode="distill">
         <div class="step-num">Pass 2 · Local LLM<span class="step-check">▾</span></div>
         <div class="step-title">Distill</div>
         <div class="step-body">Episodic index, lens extraction, decision shard. Import runs first — without a model — so the shard is cryptographically sealed before any LLM touches it.</div>
       </div>
-      <div class="pipeline-step" data-panel="query">
+      <div class="pipeline-step" data-mode="query">
         <div class="step-num">Query · DuckDB<span class="step-check">▾</span></div>
         <div class="step-title">Ask</div>
         <div class="step-body">Natural language to SQL. No LLM at query time.</div>
       </div>
     </div>
-    <div class="pipeline-panel" id="pipeline-panel" style="display:none;">
+
+    <div class="pipeline-panel" id="pipeline-panel">
       <div class="panel-body" id="panel-body"></div>
     </div>
   </section>
 
+  <!-- 03 -->
   <section class="rule-section">
     <div class="section-label"><span class="n">03</span> Shard Anatomy</div>
     <div class="shard-grid">
@@ -519,6 +536,7 @@ ext/lineage&#64;1.parquet      <span class="c-comment"># supersession chain</spa
     </div>
   </section>
 
+  <!-- 04 -->
   <section class="rule-section">
     <div class="section-label"><span class="n">04</span> The Primitives</div>
     <div class="specs-grid">
@@ -549,6 +567,7 @@ ext/lineage&#64;1.parquet      <span class="c-comment"># supersession chain</spa
     </div>
   </section>
 
+  <!-- 05 -->
   <section class="rule-section" id="install">
     <div class="section-label"><span class="n">05</span> Local Execution</div>
     <div class="install-block">
@@ -565,7 +584,7 @@ ext/lineage&#64;1.parquet      <span class="c-comment"># supersession chain</spa
         </div>
         <div class="install-phase">
           <div class="install-phase-label">Distill</div>
-          <pre><span class="c-str">ollama serve && ollama pull mistral</span>
+          <pre><span class="c-str">ollama serve &amp;&amp; ollama pull mistral</span>
 <span class="c-str">axm-chat distill</span>                <span class="c-comment"># episodic index + decision extraction</span></pre>
         </div>
         <div class="install-phase">
@@ -580,116 +599,15 @@ ext/lineage&#64;1.parquet      <span class="c-comment"># supersession chain</spa
     <p class="install-note">All data stays in <code>~/.axm/shards/</code> on your machine. Verify any shard entirely offline: <code>axm-verify ./shard_dir</code></p>
   </section>
 
+  <!-- 06 -->
   <section class="rule-section" id="architecture">
     <div class="section-label"><span class="n">06</span> Three Layers</div>
     <div class="problem-text" style="max-width:680px; margin-bottom:40px;">
       <h2>Memory has a shape.</h2>
       <p>AXM operates across three layers that share one container format but serve different temporal purposes. The protocol does not distinguish between them — all shards are structurally identical. The distinction is semantic, enforced by convention.</p>
     </div>
-    <div class="layer-onion-wrap">
-      <svg class="layer-svg" id="layer-svg" viewBox="0 0 380 380">
-        <defs>
-          <radialGradient id="lo-sheen" cx="38%" cy="32%" r="52%">
-            <stop offset="0%" stop-color="rgba(255,255,255,0.15)" />
-            <stop offset="100%" stop-color="rgba(255,255,255,0)" />
-          </radialGradient>
-        </defs>
-        <circle id="ring-l3" cx="190" cy="190" r="170" fill="#c8bca8" stroke="rgba(26,20,16,0.10)" stroke-width="1" style="cursor:pointer;transition:all 0.25s;" />
-        <circle id="ring-l2" cx="190" cy="190" r="115" fill="#8a7c6a" stroke="rgba(26,20,16,0.10)" stroke-width="1" style="cursor:pointer;transition:all 0.25s;" />
-        <circle id="ring-l1" cx="190" cy="190" r="62"  fill="#2a2018" stroke="rgba(26,20,16,0.10)" stroke-width="1" style="cursor:pointer;transition:all 0.25s;" />
-        <circle cx="190" cy="190" r="170" fill="url(#lo-sheen)" pointer-events="none" />
-        <g pointer-events="none">
-          <path id="lp-l3" d="M 45,190 A 145,145 0 0,1 335,190" fill="none"/>
-          <text font-size="9.5" fill="#1a1410" letter-spacing="2.5" font-family="'DM Mono',monospace" font-weight="500">
-            <textPath href="#lp-l3" startOffset="50%" text-anchor="middle">HOT BUFFER</textPath>
-          </text>
-        </g>
-        <g pointer-events="none">
-          <path id="lp-l2" d="M 98,190 A 92,92 0 0,1 282,190" fill="none"/>
-          <text font-size="9" fill="#f0e8d8" letter-spacing="2.5" font-family="'DM Mono',monospace" font-weight="500">
-            <textPath href="#lp-l2" startOffset="50%" text-anchor="middle">JOURNAL SHARDS</textPath>
-          </text>
-        </g>
-        <g pointer-events="none">
-          <path id="lp-l1" d="M 150,190 A 40,40 0 0,1 230,190" fill="none"/>
-          <text font-size="8" fill="#c8a84b" letter-spacing="2.5" font-family="'DM Mono',monospace" font-weight="500">
-            <textPath href="#lp-l1" startOffset="50%" text-anchor="middle">KNOWLEDGE</textPath>
-          </text>
-        </g>
-        <circle id="lo-pulse" cx="190" cy="190" r="170" fill="none"
-          stroke="rgba(200,168,75,0.35)" stroke-width="10" pointer-events="none"
-          style="animation:lo-pulse 2s ease-in-out infinite;" />
-        <style>@keyframes lo-pulse{0%,100%{opacity:0.3;}50%{opacity:0.8;}}</style>
-      </svg>
-      <div style="flex:1;min-width:260px;">
-        <div class="layer-tabs" id="layer-tabs">
-          <button class="layer-tab active" data-layer="l3">Layer 3</button>
-          <button class="layer-tab" data-layer="l2">Layer 2</button>
-          <button class="layer-tab" data-layer="l1">Layer 1</button>
-        </div>
-        <div id="layer-detail"></div>
-      </div>
-    </div>
-  </section>
 
-  <section class="rule-section" id="gold">
-    <div class="section-label"><span class="n">07</span> Definition of Correctness</div>
-    <div class="problem-grid">
-      <div class="problem-text">
-        <h2>The gold shard is the spec.</h2>
-        <p>Not a test suite. Not a reference document. A specific directory of actual files — <code>fm21-11-hemorrhage-v1/</code> — extracted from the US Army first aid field manual. It was compiled once. It will never be recompiled.</p>
-        <p>Any verifier that accepts this shard and rejects the invalid vectors in <code>tests/vectors/</code> is conformant. A change that breaks the gold shard is rejected, full stop. This is what "frozen kernel" means in practice.</p>
-        <div class="graveyard-callout" style="margin-top:28px;">
-          <p>The gold shard is the definition of correctness. Not the code. Not the docs.</p>
-        </div>
-      </div>
-      <div class="code-block" style="font-size:13.5px;">
-<pre><span class="c-comment"># axm-genesis conformance contract</span>
-<span class="c-comment"># Any verifier that passes all of these is conformant.</span>
-
-<span class="c-path">shards/gold/fm21-11-hemorrhage-v1/</span>    <span class="c-comment"># MUST pass</span>
-<span class="c-path">tests/vectors/invalid/bad_signature</span>   <span class="c-comment"># MUST reject</span>
-<span class="c-path">tests/vectors/invalid/merkle_mismatch</span> <span class="c-comment"># MUST reject</span>
-<span class="c-path">tests/vectors/invalid/orphan_claim</span>    <span class="c-comment"># MUST reject</span>
-<span class="c-path">tests/vectors/invalid/null_in_column</span>  <span class="c-comment"># MUST reject</span>
-
-<span class="c-comment"># Verify the gold shard yourself:</span>
-<span class="c-str">axm-verify shard</span> shards/gold/fm21-11-hemorrhage-v1/ \
-  <span class="c-str">--trusted-key</span> keys/canonical_test_publisher.pub
-
-<span class="c-comment"># Output: {"status":"PASS","error_count":0,"errors":[]}</span>
-<span class="c-comment"># Same output. Every machine. Every version. Forever.</span></pre>
-      </div>
-    </div>
-  </section>
-
-  <section class="rule-section" id="req5">
-    <div class="section-label"><span class="n">08</span> Non-Selective Recording</div>
-    <div class="problem-grid">
-      <div class="problem-text">
-        <h2>REQ 5: you cannot delete frames.</h2>
-        <p>For embodied spokes — robotics, sensor streams, any agent that maintains a binary hot buffer — the verifier enforces frame continuity. A gap in the <code>cam_latents.bin</code> sequence is a compliance failure. You cannot selectively delete the moment before an error occurred.</p>
-        <p>This is the technical implementation of the graveyard invariant: the record of what failed is as protected as the record of what succeeded. <code>E_BUFFER_DISCONTINUITY</code> fires on any gap, truncation, or bad magic — before the shard can be verified.</p>
-        <p style="margin-bottom:0;">Chat shards and document shards are unaffected. This check runs only when <code>content/cam_latents.bin</code> is present.</p>
-      </div>
-      <div class="code-block">
-<pre><span class="c-comment"># cam_latents.bin binary format</span>
-<span class="c-comment"># File: [AXLF(4)] [records …]</span>
-<span class="c-comment"># Record: [AXLR(4)] [ver(1)] [frame_id(4)] [len(4)] [payload]</span>
-
-<span class="c-comment"># A gap between frame 4 and frame 6 → FAIL</span>
-frame 0  blake3:a1b2c3…  ✓
-frame 1  blake3:d4e5f6…  ✓
-frame 2  blake3:g7h8i9…  ✓
-frame 3  blake3:j1k2l3…  ✓
-frame 4  blake3:m4n5o6…  ✓
-<span class="c-str">frame 5  [MISSING]</span>       <span class="c-comment"># E_BUFFER_DISCONTINUITY</span>
-frame 6  blake3:p7q8r9…  ✗ rejected
-
-<span class="c-comment"># axm-verify halts here. The shard cannot pass.</span>
-<span class="c-comment"># The moment before the failure is part of the record.</span></pre>
-      </div>
-    </div>
+    <div id="layer-onion-mount"></div>
   </section>
 
   <footer>
@@ -697,58 +615,66 @@ frame 6  blake3:p7q8r9…  ✗ rejected
       AXM &nbsp;·&nbsp; Apache 2.0 &nbsp;·&nbsp; BLAKE3 + ML-DSA-44
       <div class="footer-links">
         <a href="https://github.com/BigBirdReturns/axm-genesis" target="_blank">axm-genesis</a>
-        <a href="https://github.com/BigBirdReturns/axm-core" target="_blank">axm-core</a>
-        <a href="https://github.com/BigBirdReturns/axm-chat" target="_blank">axm-chat</a>
+        <a href="https://github.com/BigBirdReturns/axm-core"    target="_blank">axm-core</a>
+        <a href="https://github.com/BigBirdReturns/axm-chat"    target="_blank">axm-chat</a>
       </div>
     </div>
     <div class="footer-right">your conversations · your claims · your keys</div>
   </footer>
 
-</div>
+</div><!-- /.page -->
 
 <script>
-// ── Utilities ────────────────────────────────────────────────────
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+'use strict';
 
-// ── Manifest toggle ──────────────────────────────────────────────
-function toggleManifest(){
-  const el=document.getElementById('manifest-example');
-  el.style.display=el.style.display==='none'?'block':'none';
+// ── Manifest toggle ──────────────────────────────────────────
+function toggleManifest() {
+  const el = document.getElementById('manifest-example');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
-// ── Demo data ────────────────────────────────────────────────────
-const DEMO_SHARDS=[
-  {name:'shard_a1b2c3',title:'AXM architecture — kernel design',claims:34},
-  {name:'shard_d4e5f6',title:'axm-chat — spoke design conversations',claims:22},
-  {name:'shard_g7h8i9',title:'axm-core — Spectra query engine design',claims:19},
+// ── Demo data ─────────────────────────────────────────────────
+const SHARDS = [
+  { name:'shard_a1b2c3', title:'AXM architecture — kernel design',       claims:34 },
+  { name:'shard_d4e5f6', title:'axm-chat — spoke design conversations',   claims:22 },
+  { name:'shard_g7h8i9', title:'axm-core — Spectra query engine design',  claims:19 },
 ];
-const DEMO_DECISIONS=[
-  {subject:'axm-genesis',predicate:'adopted',object:'immutable cryptographic kernel pattern',
-   reasoning:'Separating the signing layer from orchestration lets spokes extend independently without touching trust.',
-   decided_at:'2026-02-14',
-   graveyard:['mutable manifest (rejected: defeats Merkle invariant)','runtime re-signing (rejected: opens TOCTOU window)']},
-  {subject:'deployment',predicate:'rejected',object:'vendor cloud storage for shards',
-   reasoning:'Defeats the core invariant. Sovereign knowledge requires the owner controls the storage medium.',
-   decided_at:'2026-02-14',
-   graveyard:['S3 with client-side encryption (rejected: key escrow risk)','IPFS pinning (rejected: network dependency for offline use)']},
-  {subject:'axm-chat',predicate:'adopted',object:'two-pass pipeline — import then distill',
-   reasoning:'Pass 1 requires no LLM. Separating signing from extraction means the shard is cryptographically valid before any model runs.',
-   decided_at:'2026-02-15',
-   graveyard:['single-pass with inline extraction (rejected: LLM failure voids signing)','post-hoc re-signing after distill (rejected: breaks Merkle chain)']},
-  {subject:'query layer',predicate:'adopted',object:'DuckDB over Parquet as the query surface',
-   reasoning:'Standard tooling. Any data scientist can inspect shards without the AXM stack installed.',
-   decided_at:'2026-02-16',
-   graveyard:['SQLite (rejected: row-oriented, poor for claim graphs)','custom binary format (rejected: opaque, anti-thesis of the project)']},
-];
-const DEMO_QUERIES={
-  'what decisions have we made':{
-    columns:['subject','predicate','object','date'],
-    rows:DEMO_DECISIONS.map(d=>[d.subject,d.predicate,d.object,d.decided_at]),
-    sql:`SELECT subject, predicate, object, decided_at\nFROM claims\nJOIN shards USING (shard_id)\nWHERE predicate IN ('adopted','rejected')\nORDER BY decided_at DESC`,
-    note:'4 decision records across 3 shards · 2 adopted · 1 rejected · verified ✓'
+
+const DECISIONS = [
+  {
+    subject:'axm-genesis', predicate:'adopted', object:'immutable cryptographic kernel pattern',
+    reasoning:'Separating the signing layer from orchestration lets spokes extend independently without touching trust.',
+    decided_at:'2026-02-14',
+    graveyard:['mutable manifest (rejected: defeats Merkle invariant)','runtime re-signing (rejected: opens TOCTOU window)'],
   },
-  'what failed before we solved the merkle problem':{
+  {
+    subject:'deployment', predicate:'rejected', object:'vendor cloud storage for shards',
+    reasoning:'Defeats the core invariant. Sovereign knowledge requires the owner controls the storage medium.',
+    decided_at:'2026-02-14',
+    graveyard:['S3 with client-side encryption (rejected: key escrow risk)','IPFS pinning (rejected: network dependency for offline use)'],
+  },
+  {
+    subject:'axm-chat', predicate:'adopted', object:'two-pass pipeline — import then distill',
+    reasoning:'Pass 1 requires no LLM. Separating signing from extraction means the shard is cryptographically valid before any model runs.',
+    decided_at:'2026-02-15',
+    graveyard:['single-pass with inline extraction (rejected: LLM failure voids signing)','post-hoc re-signing after distill (rejected: breaks Merkle chain)'],
+  },
+  {
+    subject:'query layer', predicate:'adopted', object:'DuckDB over Parquet as the query surface',
+    reasoning:'Standard tooling. Any data scientist can inspect shards without the AXM stack installed.',
+    decided_at:'2026-02-16',
+    graveyard:['SQLite (rejected: row-oriented, poor for claim graphs)','custom binary format (rejected: opaque, anti-thesis of the project)'],
+  },
+];
+
+const QUERIES = {
+  'what decisions have we made': {
+    columns:['subject','predicate','object','date'],
+    rows: DECISIONS.map(d => [d.subject, d.predicate, d.object, d.decided_at]),
+    sql:`SELECT subject, predicate, object, decided_at\nFROM claims\nJOIN shards USING (shard_id)\nWHERE predicate IN ('adopted','rejected')\nORDER BY decided_at DESC`,
+    note:'4 decision records across 3 shards · 2 adopted · 1 rejected · verified ✓',
+  },
+  'what failed before we solved the merkle problem': {
     columns:['attempt','reason','shard'],
     rows:[
       ['mutable manifest','defeats Merkle invariant — root changes on every update','shard_a1b2c3'],
@@ -756,109 +682,141 @@ const DEMO_QUERIES={
       ['post-hoc re-signing after distill','breaks Merkle chain — ext/ tables not included in original root','shard_d4e5f6'],
     ],
     sql:`SELECT object AS attempt, reasoning AS reason, shard_id AS shard\nFROM claims\nJOIN ext.engineering USING (claim_id)\nWHERE graveyard IS NOT NULL\n  AND subject LIKE '%merkle%'`,
-    note:'Query reached into ext/engineering\u00401.parquet graveyard field · 3 failed attempts recovered'
+    note:'Query reached into ext/engineering\u00401.parquet graveyard field · 3 failed attempts recovered',
   },
-  'default':{
+  default: {
     columns:['subject','predicate','object'],
-    rows:DEMO_DECISIONS.slice(0,3).map(d=>[d.subject,d.predicate,d.object]),
+    rows: DECISIONS.slice(0,3).map(d => [d.subject, d.predicate, d.object]),
     sql:`SELECT subject, predicate, object\nFROM claims LIMIT 10`,
-    note:'Showing first 10 claims across mounted shards'
-  }
+    note:'Showing first 10 claims across mounted shards',
+  },
 };
 
-// ── Pipeline tabs ────────────────────────────────────────────────
-const pipeNav   = document.getElementById('pipeline-nav');
-const pipePanel = document.getElementById('pipeline-panel');
-const panelBody = document.getElementById('panel-body');
-let activePanel = null;
+function h(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-pipeNav.addEventListener('click', e => {
-  const step = e.target.closest('.pipeline-step');
-  if (!step) return;
-  const m = step.dataset.panel;
-  if (activePanel === m) {
-    step.classList.remove('active');
-    pipePanel.style.display = 'none';
-    activePanel = null;
-    return;
-  }
-  pipeNav.querySelectorAll('.pipeline-step').forEach(s=>s.classList.remove('active'));
-  step.classList.add('active');
-  pipePanel.style.display = '';
-  activePanel = m;
-  if (m==='import')  renderImport();
-  if (m==='distill') renderDistill();
-  if (m==='query')   renderQuery();
-  requestAnimationFrame(()=>setTimeout(()=>{
-    const y=pipeNav.getBoundingClientRect().top+window.scrollY-24;
-    window.scrollTo({top:y,behavior:'smooth'});
-  },50));
+// ── Pipeline tabs ─────────────────────────────────────────────
+const pipelineNav   = document.getElementById('pipeline-nav');
+const pipelinePanel = document.getElementById('pipeline-panel');
+const panelBody     = document.getElementById('panel-body');
+let activeMode = null;
+
+const DEMO_BANNER = `
+  <div class="demo-banner">
+    <span class="demo-banner-gem">◈</span>
+    <span>Demo simulation — data shown is AXM's own architecture decisions.
+      <span style="color:var(--ink-faint)"> Start axm-core locally to use real exports.</span>
+    </span>
+  </div>`;
+
+pipelineNav.querySelectorAll('.pipeline-step').forEach(step => {
+  step.addEventListener('click', () => {
+    const mode = step.dataset.mode;
+    if (activeMode === mode) {
+      step.classList.remove('active');
+      pipelinePanel.classList.remove('open');
+      activeMode = null;
+      return;
+    }
+    pipelineNav.querySelectorAll('.pipeline-step').forEach(s => s.classList.remove('active'));
+    step.classList.add('active');
+    pipelinePanel.classList.add('open');
+    activeMode = mode;
+    renderPanel(mode);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const y = pipelineNav.getBoundingClientRect().top + window.scrollY - 24;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }, 50);
+    });
+  });
 });
 
-const BANNER=`<div class="demo-banner"><span class="demo-banner-gem">◈</span><span>Demo simulation — data shown is AXM's own architecture decisions. <span style="color:var(--ink-faint)">Start axm-core locally to use real exports.</span></span></div>`;
+function renderPanel(mode) {
+  if (mode === 'import')  buildImport();
+  if (mode === 'distill') buildDistill();
+  if (mode === 'query')   buildQuery();
+}
 
-// Import panel
-function renderImport(){
-  panelBody.innerHTML=`${BANNER}<div class="panel-fade">
-    <h2 class="panel-title">Import Conversations</h2>
-    <p class="panel-sub">Drop your Claude or ChatGPT export. ZIP or JSON. One signed shard per conversation.</p>
-    <div class="drop-zone"><div class="drop-zone-icon">↓</div><div class="drop-zone-label">file upload requires axm-core running locally</div></div>
-    <button class="demo-btn" id="import-btn">Compile Shards</button>
-    <div class="log-term" id="import-log" style="display:none;"></div>
-  </div>`;
-  document.getElementById('import-btn').addEventListener('click', async function(){
-    if(this.disabled)return;
-    this.disabled=true; this.textContent='Importing…';
-    const log=document.getElementById('import-log');
-    log.style.display=''; log.innerHTML='';
-    const lines=[
-      ['axm-chat import ./axm_chat_conversations.json','info',[0]],
-      ['─────────────────────────────────────────────────','info',[0]],
-      ['[ 1/3 ]  axm architecture — kernel design','info',[220]],
-      ['         claims: 34  ·  entities: 12','info',[180]],
-      ['         merkle: blake3:e30deb2381…dcee21','pass',[120]],
-      ['         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes','pass',[100]],
-      ['         → shard_a1b2c3  SEALED ✓','pass',[120]],
-      ['[ 2/3 ]  axm-chat — spoke design conversations','info',[220]],
-      ['         claims: 22  ·  entities: 8','info',[180]],
-      ['         merkle: blake3:7db1e326e5…0b7d3','pass',[120]],
-      ['         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes','pass',[100]],
-      ['         → shard_d4e5f6  SEALED ✓','pass',[120]],
-      ['[ 3/3 ]  axm-core — Spectra query engine','info',[220]],
-      ['         claims: 19  ·  entities: 7','info',[180]],
-      ['         merkle: blake3:0a5beabfcf…3165','pass',[120]],
-      ['         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes','pass',[100]],
-      ['         → shard_g7h8i9  SEALED ✓','pass',[120]],
-      ['─────────────────────────────────────────────────','info',[200]],
-      ['3 shards compiled  ·  75 claims  ·  ~/.axm/shards/','pass',[100]],
+// Import
+function buildImport() {
+  panelBody.innerHTML = `${DEMO_BANNER}
+    <div class="panel-fade">
+      <h2 class="panel-h2">Import Conversations</h2>
+      <p class="panel-sub">Drop your Claude or ChatGPT export. ZIP or JSON. One signed shard per conversation.</p>
+      <div class="drop-zone">
+        <div class="drop-zone-icon">↓</div>
+        <div class="drop-zone-label">file upload requires axm-core running locally</div>
+      </div>
+      <button class="demo-btn" id="import-btn">Compile Shards</button>
+      <div class="log-term" id="import-log" style="display:none;"></div>
+    </div>`;
+
+  const btn = document.getElementById('import-btn');
+  const log = document.getElementById('import-log');
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    btn.disabled = true; btn.textContent = 'Importing…';
+    log.style.display = '';
+
+    const lines = [
+      ['axm-chat import ./axm_chat_conversations.json','info',0],
+      ['─────────────────────────────────────────────────','info',0],
+      ['[ 1/3 ]  axm architecture — kernel design','info',220],
+      ['         claims: 34  ·  entities: 12','info',180],
+      ['         merkle: blake3:e30deb2381…dcee21','pass',120],
+      ['         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes','pass',100],
+      ['         → shard_a1b2c3  SEALED ✓','pass',120],
+      ['[ 2/3 ]  axm-chat — spoke design conversations','info',220],
+      ['         claims: 22  ·  entities: 8','info',180],
+      ['         merkle: blake3:7db1e326e5…0b7d3','pass',120],
+      ['         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes','pass',100],
+      ['         → shard_d4e5f6  SEALED ✓','pass',120],
+      ['[ 3/3 ]  axm-core — Spectra query engine','info',220],
+      ['         claims: 19  ·  entities: 7','info',180],
+      ['         merkle: blake3:0a5beabfcf…3165','pass',120],
+      ['         sig:    ML-DSA-44 · FIPS 204 · 2420 bytes','pass',100],
+      ['         → shard_g7h8i9  SEALED ✓','pass',120],
+      ['─────────────────────────────────────────────────','info',200],
+      ['3 shards compiled  ·  75 claims  ·  ~/.axm/shards/','pass',100],
     ];
-    for(const [msg,cls,[w]] of lines){
-      await delay(w);
-      log.innerHTML+=`<div class="l-${cls}">${esc(msg)}</div>`;
-      log.scrollTop=log.scrollHeight;
+    for (const [msg, cls, wait] of lines) {
+      await sleep(wait);
+      log.innerHTML += `<div class="l-${cls}">${h(msg)}</div>`;
+      log.scrollTop = log.scrollHeight;
     }
-    this.disabled=false; this.textContent='Compile Shards';
+    btn.disabled = false; btn.textContent = 'Compile Shards';
   });
 }
 
-// Distill panel
-function renderDistill(){
-  const opts=DEMO_SHARDS.map(s=>`<option value="${s.name}">${esc(s.title)} (${s.claims} claims)</option>`).join('');
-  panelBody.innerHTML=`${BANNER}<div class="panel-fade">
-    <h2 class="panel-title">Distill Decisions</h2>
-    <p class="panel-sub">Three passes: episodic index, lens extraction, decision compilation. Produces a compact signed shard.</p>
-    <select class="d-select"><option value="">Select a conversation shard…</option>${opts}</select>
-    <div style="margin-bottom:24px;"><button class="demo-btn" id="distill-btn">Distill &amp; Compile</button></div>
-    <div class="log-term" id="distill-log" style="display:none;"></div>
-    <div id="distill-cards"></div>
-  </div>`;
-  document.getElementById('distill-btn').addEventListener('click', async function(){
-    if(this.disabled)return;
-    this.disabled=true; this.textContent='Extracting…';
-    const log=document.getElementById('distill-log');
-    const cards=document.getElementById('distill-cards');
-    log.style.display=''; log.innerHTML=''; cards.innerHTML='';
-    const lines=[
+// Distill
+function buildDistill() {
+  const opts = SHARDS.map(s => `<option value="${s.name}">${h(s.title)} (${s.claims} claims)</option>`).join('');
+  panelBody.innerHTML = `${DEMO_BANNER}
+    <div class="panel-fade">
+      <h2 class="panel-h2">Distill Decisions</h2>
+      <p class="panel-sub">Three passes: episodic index, lens extraction, decision compilation. Produces a compact signed shard.</p>
+      <select class="d-select" id="d-select">
+        <option value="">Select a conversation shard…</option>${opts}
+      </select>
+      <div style="margin-bottom:24px;">
+        <button class="demo-btn" id="distill-btn">Distill &amp; Compile</button>
+      </div>
+      <div class="log-term" id="distill-log" style="display:none;"></div>
+      <div id="distill-cards"></div>
+    </div>`;
+
+  const btn   = document.getElementById('distill-btn');
+  const log   = document.getElementById('distill-log');
+  const cards = document.getElementById('distill-cards');
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    btn.disabled = true; btn.textContent = 'Extracting…';
+    log.style.display = ''; log.innerHTML = ''; cards.innerHTML = '';
+
+    const lines = [
       ['axm-chat distill  (Mistral · local · no data leaves machine)','info',0],
       ['─────────────────────────────────────────────────────────────','info',0],
       ['Pass 1 / episodic index…','info',250],
@@ -872,134 +830,270 @@ function renderDistill(){
       ['  rule:      the kernel never re-signs; spokes never touch the Merkle root','info',200],
       ['Pass 3 / decision extraction (Mistral)…','info',250],
     ];
-    for(const [msg,cls,w] of lines){
-      await delay(w);
-      log.innerHTML+=`<div class="l-${cls}">${esc(msg)}</div>`;
-      log.scrollTop=log.scrollHeight;
+    for (const [msg, cls, wait] of lines) {
+      await sleep(wait);
+      log.innerHTML += `<div class="l-${cls}">${h(msg)}</div>`;
+      log.scrollTop = log.scrollHeight;
     }
-    for(const d of DEMO_DECISIONS){
-      await delay(380);
-      const t=d.predicate==='rejected'?'fail':'pass';
-      log.innerHTML+=`<div class="l-${t}">  [${d.predicate.toUpperCase()}]  ${esc(d.subject)} → ${esc(d.object)}</div>`;
-      log.scrollTop=log.scrollHeight;
+    for (const d of DECISIONS) {
+      await sleep(380);
+      const cls = d.predicate === 'rejected' ? 'fail' : 'pass';
+      log.innerHTML += `<div class="l-${cls}">  [${h(d.predicate.toUpperCase())}]  ${h(d.subject)} → ${h(d.object)}</div>`;
+      log.scrollTop = log.scrollHeight;
     }
-    await delay(250);
-    log.innerHTML+=`<div class="l-info">─────────────────────────────────────────────────────────────</div>`;
-    await delay(150);
-    log.innerHTML+=`<div class="l-pass">ext/engineering\u00401.parquet  written</div>`;
-    await delay(100);
-    log.innerHTML+=`<div class="l-pass">ext/episodes\u00401.parquet     written</div>`;
-    await delay(100);
-    log.innerHTML+=`<div class="l-pass">Merkle recomputed  ·  shard resealed  ·  signed ML-DSA-44 ✓</div>`;
-    log.scrollTop=log.scrollHeight;
-    cards.innerHTML=DEMO_DECISIONS.map(d=>{
-      const grave=d.graveyard.map(g=>`<div class="dc-g-item">✗ ${esc(g)}</div>`).join('');
+    const footer = [
+      ['─────────────────────────────────────────────────────────────','info',250],
+      ['ext/engineering\u00401.parquet  written','pass',150],
+      ['ext/episodes\u00401.parquet     written','pass',100],
+      ['Merkle recomputed  ·  shard resealed  ·  signed ML-DSA-44 ✓','pass',100],
+    ];
+    for (const [msg, cls, wait] of footer) {
+      await sleep(wait);
+      log.innerHTML += `<div class="l-${cls}">${h(msg)}</div>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    cards.innerHTML = DECISIONS.map(d => {
+      const grave = d.graveyard.map(g => `<div class="dc-g-item">✗ ${h(g)}</div>`).join('');
       return `<div class="decision-card">
         <div class="dc-header">
-          <span class="dc-badge ${d.predicate}">${esc(d.predicate)}</span>
-          <span class="dc-subject">${esc(d.subject)}</span>
+          <span class="dc-badge ${h(d.predicate)}">${h(d.predicate)}</span>
+          <span class="dc-subject">${h(d.subject)}</span>
           <span class="dc-arrow">→</span>
-          <span class="dc-object">${esc(d.object)}</span>
+          <span class="dc-object">${h(d.object)}</span>
         </div>
-        <div class="dc-reason">${esc(d.reasoning)}</div>
-        ${grave?`<div class="dc-graveyard"><div class="dc-g-label">graveyard</div>${grave}</div>`:''}
+        <div class="dc-reason">${h(d.reasoning)}</div>
+        ${grave ? `<div class="dc-graveyard"><div class="dc-g-label">graveyard</div>${grave}</div>` : ''}
       </div>`;
     }).join('');
-    this.disabled=false; this.textContent='Distill & Compile';
+
+    btn.disabled = false; btn.textContent = 'Distill & Compile';
   });
 }
 
-// Query panel
-function renderQuery(){
-  panelBody.innerHTML=`${BANNER}<div class="panel-fade">
-    <h2 class="panel-title">Query Knowledge</h2>
-    <p class="panel-sub">Natural language → DuckDB SQL. Runs locally against all mounted shards. No LLM at query time.</p>
-    <div class="q-row">
-      <input class="q-input" id="q-input" placeholder="what did we decide about…" type="text" />
-      <button class="q-ask" id="q-ask">Ask</button>
-    </div>
-    <div class="q-chips">
-      <button class="q-chip">what decisions have we made</button>
-      <button class="q-chip">what failed before we solved the merkle problem</button>
-      <button class="q-chip">what changed since january</button>
-    </div>
-    <div id="q-result"></div>
-  </div>`;
+// Query
+function buildQuery() {
+  panelBody.innerHTML = `${DEMO_BANNER}
+    <div class="panel-fade">
+      <h2 class="panel-h2">Query Knowledge</h2>
+      <p class="panel-sub">Natural language → DuckDB SQL. Runs locally against all mounted shards. No LLM at query time.</p>
+      <div class="q-row">
+        <input class="q-input" id="q-input" placeholder="what did we decide about…" type="text" />
+        <button class="q-ask" id="q-ask">Ask</button>
+      </div>
+      <div class="q-chips" id="q-chips">
+        <button class="q-chip">what decisions have we made</button>
+        <button class="q-chip">what failed before we solved the merkle problem</button>
+        <button class="q-chip">what changed since january</button>
+      </div>
+      <div id="q-result"></div>
+    </div>`;
 
-  const input=document.getElementById('q-input');
-  const askBtn=document.getElementById('q-ask');
-  const result=document.getElementById('q-result');
+  const input  = document.getElementById('q-input');
+  const askBtn = document.getElementById('q-ask');
+  const result = document.getElementById('q-result');
 
-  async function run(q){
-    if(!q.trim())return;
-    askBtn.disabled=true; askBtn.textContent='…'; result.innerHTML='';
-    await delay(400);
-    const key=Object.keys(DEMO_QUERIES).find(k=>q.toLowerCase().includes(k.split(' ').slice(0,3).join(' ')))||'default';
-    const res=DEMO_QUERIES[key];
-    let html='';
-    if(res.sql) html+=`<div class="q-sql">${esc(res.sql)}</div>`;
-    if(res.note) html+=`<div class="q-note">↳ ${esc(res.note)}</div>`;
-    if(res.rows?.length){
-      const ths=res.columns.map(c=>`<th>${esc(c)}</th>`).join('');
-      const trs=res.rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');
-      html+=`<div class="q-table-wrap"><table class="q-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+  async function runQuery(q) {
+    if (!q.trim() || askBtn.disabled) return;
+    askBtn.disabled = true; askBtn.textContent = '…';
+    result.innerHTML = '';
+    await sleep(400);
+
+    const key = Object.keys(QUERIES).find(k =>
+      q.toLowerCase().includes(k.split(' ').slice(0,3).join(' '))
+    ) || 'default';
+    const res = QUERIES[key];
+
+    let out = '';
+    if (res.sql)  out += `<div class="q-sql">${h(res.sql)}</div>`;
+    if (res.note) out += `<div class="q-note">↳ ${h(res.note)}</div>`;
+    if (res.rows?.length) {
+      const ths = res.columns.map(c => `<th>${h(c)}</th>`).join('');
+      const trs = res.rows.map(r => `<tr>${r.map(c => `<td>${h(c)}</td>`).join('')}</tr>`).join('');
+      out += `<div class="q-table-wrap"><table class="q-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
     }
-    result.innerHTML=html;
-    askBtn.disabled=false; askBtn.textContent='Ask';
+    result.innerHTML = out;
+    askBtn.disabled = false; askBtn.textContent = 'Ask';
   }
 
-  askBtn.addEventListener('click',()=>run(input.value));
-  input.addEventListener('keydown',e=>{if(e.key==='Enter')run(input.value);});
-  panelBody.querySelectorAll('.q-chip').forEach(chip=>{
-    chip.addEventListener('click',()=>{input.value=chip.textContent; run(chip.textContent);});
+  askBtn.addEventListener('click', () => runQuery(input.value));
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') runQuery(input.value); });
+  document.getElementById('q-chips').querySelectorAll('.q-chip').forEach(chip => {
+    chip.addEventListener('click', () => { input.value = chip.textContent; runQuery(chip.textContent); });
   });
 }
 
-// ── Three-layer onion ────────────────────────────────────────────
-const LAYERS={
-  l3:{meta:'Append-only · Working memory',name:'Hot Buffer',
-    desc:'No cryptographic overhead. Nanosecond appends. Structured JSONL records written as events occur. When the session ends — or a size or time threshold fires — the buffer is compiled into a journal shard and sealed.',
-    example:'live trace events · seal trigger on session close or every 1000 events',ringR:170},
-  l2:{meta:'Session-boundary · Immutable',name:'Journal Shards',
-    desc:'Decision traces. Not what the manual says — how the manual was applied. Every query, every retrieval gate, every rejected candidate is a claim. Future queries can see both the doctrine and the history of how it was used.',
-    example:'what we tried · what failed · what survived · when the rule changed',ringR:115},
-  l1:{meta:'Build-time · Immutable',name:'Knowledge Shards',
-    desc:'Compiled reference material. A document enters Forge, claims are extracted, Merkle root is computed, ML-DSA-44 signs it. The shard is sealed. It never changes. You can verify it a decade from now without this software.',
-    example:'FM 21-11 field medicine · California Family Code §2030 · your architecture conversations',ringR:62},
-};
-let activeLayer='l3';
+// ── Three-layer onion (genesis-parity) ───────────────────────
+(function(){
+  const LAYERS = [
+    {
+      id:'l1', short:'Layer 1', label:'Knowledge Shards', ringR:62,
+      fillActive:'rgba(200,168,75,0.18)', fillIdle:'#2a2018',
+      strokeActive:'rgba(200,168,75,0.7)', strokeIdle:'rgba(26,20,16,0.10)',
+      arcColor:'#c8a84b', arcColorIdle:'rgba(26,20,16,0.35)',
+      arcSweep:72,
+      meta:'Build-time · Immutable',
+      name:'Knowledge Shards',
+      desc:'Compiled reference material. A document enters Forge, claims are extracted, Merkle root is computed, ML-DSA-44 signs it. The shard is sealed. It never changes. You can verify it a decade from now without this software.',
+      example:'FM 21-11 field medicine · California Family Code §2030 · your architecture conversations',
+    },
+    {
+      id:'l2', short:'Layer 2', label:'Journal Shards', ringR:115,
+      fillActive:'rgba(138,120,96,0.14)', fillIdle:'#8a7c6a',
+      strokeActive:'rgba(138,120,96,0.55)', strokeIdle:'rgba(26,20,16,0.10)',
+      arcColor:'#6a5c4a', arcColorIdle:'rgba(26,20,16,0.25)',
+      arcSweep:90,
+      meta:'Session-boundary · Immutable',
+      name:'Journal Shards',
+      desc:'Decision traces. Not what the manual says — how the manual was applied. Every query, every retrieval gate, every rejected candidate is a claim. Future queries can see both the doctrine and the history of how it was used.',
+      example:'what we tried · what failed · what survived · when the rule changed',
+    },
+    {
+      id:'l3', short:'Layer 3', label:'Hot Buffer', ringR:170,
+      fillActive:'rgba(26,20,16,0.07)', fillIdle:'#c8bca8',
+      strokeActive:'rgba(26,20,16,0.28)', strokeIdle:'rgba(26,20,16,0.10)',
+      arcColor:'#3a3020', arcColorIdle:'rgba(26,20,16,0.25)',
+      arcSweep:105,
+      meta:'Append-only · Working memory',
+      name:'Hot Buffer',
+      desc:'No cryptographic overhead. Nanosecond appends. Structured JSONL records written as events occur. When the session ends — or a size or time threshold fires — the buffer is compiled into a journal shard and sealed.',
+      example:'live trace events · seal trigger on session close or every 1000 events',
+    },
+  ];
 
-function setLayer(id){
-  activeLayer=id;
-  document.querySelectorAll('.layer-tab').forEach(t=>t.classList.toggle('active',t.dataset.layer===id));
-  ['l1','l2','l3'].forEach(lid=>{
-    const r=document.getElementById('ring-'+lid);
-    if(!r)return;
-    r.setAttribute('stroke',lid===id?'#c8a84b':'rgba(26,20,16,0.10)');
-    r.setAttribute('stroke-width',lid===id?'3':'1');
-    r.style.opacity=lid===id?'1':'0.5';
+  const cx=190, cy=190;
+  const NS='http://www.w3.org/2000/svg';
+  function svgEl(tag,attrs,parent){
+    const e=document.createElementNS(NS,tag);
+    for(const [k,v] of Object.entries(attrs||{})) e.setAttribute(k,v);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+
+  const svg=svgEl('svg',{viewBox:'0 0 380 380',
+    style:'width:300px;flex-shrink:0;cursor:pointer;filter:drop-shadow(0 4px 24px rgba(26,20,16,0.08));display:block;'});
+
+  // Defs
+  const defs=svgEl('defs',{},svg);
+  const fG=svgEl('filter',{id:'lo-glow2'},defs);
+  svgEl('feGaussianBlur',{stdDeviation:'5',result:'blur'},fG);
+  const fM=svgEl('feMerge',{},fG);
+  svgEl('feMergeNode',{in:'blur'},fM); svgEl('feMergeNode',{in:'SourceGraphic'},fM);
+  const rG=svgEl('radialGradient',{id:'lo-sheen2',cx:'38%',cy:'32%',r:'52%'},defs);
+  svgEl('stop',{offset:'0%','stop-color':'rgba(255,255,255,0.13)'},rG);
+  svgEl('stop',{offset:'100%','stop-color':'rgba(255,255,255,0)'},rG);
+
+  // Grid
+  for(let i=0;i<8;i++){
+    svgEl('line',{x1:i*55,y1:0,x2:i*55,y2:380,stroke:'rgba(26,20,16,0.04)','stroke-width':1},svg);
+    svgEl('line',{x1:0,y1:i*55,x2:380,y2:i*55,stroke:'rgba(26,20,16,0.04)','stroke-width':1},svg);
+  }
+
+  // Rings outer→inner
+  const ringEls={};
+  [...LAYERS].reverse().forEach(L=>{
+    const c=svgEl('circle',{cx,cy,r:L.ringR,fill:L.fillIdle,stroke:L.strokeIdle,'stroke-width':1,style:'cursor:pointer;transition:all 0.3s;'},svg);
+    c.addEventListener('click',()=>setLayer(L.id));
+    ringEls[L.id]=c;
   });
-  const pulse=document.getElementById('lo-pulse');
-  if(pulse)pulse.setAttribute('r',String(LAYERS[id].ringR));
-  const L=LAYERS[id];
-  document.getElementById('layer-detail').innerHTML=`<div class="layer-detail">
-    <div class="layer-detail-meta">${esc(L.meta)}</div>
-    <div class="layer-detail-name">${esc(L.name)}</div>
-    <p class="layer-detail-desc">${esc(L.desc)}</p>
-    <div class="layer-detail-example">${esc(L.example)}</div>
-  </div>`;
-}
 
-setLayer('l3');
+  svgEl('circle',{cx,cy,r:170,fill:'url(#lo-sheen2)','pointer-events':'none'},svg);
 
-document.getElementById('layer-tabs').addEventListener('click',e=>{
-  const t=e.target.closest('.layer-tab');
-  if(t)setLayer(t.dataset.layer);
-});
-['l1','l2','l3'].forEach(id=>{
-  const r=document.getElementById('ring-'+id);
-  if(r)r.addEventListener('click',()=>setLayer(id));
-});
+  // Arc labels
+  const arcEls={};
+  LAYERS.forEach(L=>{
+    const r=L.ringR, sweep=L.arcSweep;
+    const startA=(180-sweep)/2, endA=startA+sweep;
+    const toRad=a=>(a-90)*Math.PI/180;
+    const x1=cx+r*Math.cos(toRad(startA)), y1=cy+r*Math.sin(toRad(startA));
+    const x2=cx+r*Math.cos(toRad(endA)),   y2=cy+r*Math.sin(toRad(endA));
+    const pid=`lp2-${L.id}`;
+    const g=svgEl('g',{},svg);
+    svgEl('path',{id:pid,d:`M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}`,fill:'none',stroke:'none'},g);
+    const txt=svgEl('text',{style:'cursor:pointer;'},g);
+    txt.addEventListener('click',()=>setLayer(L.id));
+    const tp=svgEl('textPath',{href:`#${pid}`,startOffset:'50%','text-anchor':'middle',
+      style:`font-size:${L.ringR<80?'9':L.ringR<130?'9.5':'10'}px;font-weight:500;letter-spacing:0.18em;fill:${L.arcColorIdle};font-family:'DM Mono',monospace;transition:fill 0.3s;text-transform:uppercase;`},txt);
+    tp.textContent=L.label;
+    arcEls[L.id]=tp;
+  });
+
+  // Pulse
+  const pulseRing=svgEl('circle',{cx,cy,r:170,fill:'none',stroke:'rgba(200,168,75,0.3)','stroke-width':8,
+    'pointer-events':'none',style:'animation:lo-pulse2 2.2s ease-in-out infinite;'},svg);
+  const st=document.createElement('style');
+  st.textContent='@keyframes lo-pulse2{0%,100%{opacity:0.2;}50%{opacity:0.7;}}';
+  document.head.appendChild(st);
+
+  // Crosshairs + center dot + AXM label
+  svgEl('line',{x1:cx-10,y1:cy,x2:cx+10,y2:cy,stroke:'rgba(26,20,16,0.12)','stroke-width':1},svg);
+  svgEl('line',{x1:cx,y1:cy-10,x2:cx,y2:cy+10,stroke:'rgba(26,20,16,0.12)','stroke-width':1},svg);
+  svgEl('circle',{cx,cy,r:3,fill:'#c8a84b',opacity:0.7},svg);
+  const cLbl=svgEl('text',{x:cx,y:cy-10,'text-anchor':'middle',
+    style:"font-size:9px;fill:#8a6a10;letter-spacing:0.22em;font-family:'DM Mono',monospace;font-weight:500;"},svg);
+  cLbl.textContent='AXM';
+
+  // Tabs
+  const tabsEl=document.createElement('div');
+  tabsEl.className='layer-tabs';
+  // show L3→L1 order in tabs
+  ['l3','l2','l1'].forEach(lid=>{
+    const L=LAYERS.find(l=>l.id===lid);
+    const btn=document.createElement('button');
+    btn.className='layer-tab'; btn.dataset.layer=L.id; btn.textContent=L.short;
+    btn.addEventListener('click',()=>setLayer(L.id));
+    tabsEl.appendChild(btn);
+  });
+
+  // Detail div
+  const detailEl=document.createElement('div');
+  detailEl.id='layer-detail';
+
+  // Mount into #layer-onion-mount
+  const wrap=document.createElement('div');
+  wrap.className='layer-onion-wrap';
+  wrap.appendChild(svg);
+  const right=document.createElement('div');
+  right.style.cssText='flex:1;min-width:260px;';
+  right.appendChild(tabsEl); right.appendChild(detailEl);
+  wrap.appendChild(right);
+  document.getElementById('layer-onion-mount').appendChild(wrap);
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  function setLayer(id){
+    const L=LAYERS.find(l=>l.id===id);
+    LAYERS.forEach(l=>{
+      const r=ringEls[l.id], isA=l.id===id;
+      r.setAttribute('fill', isA?l.fillActive:l.fillIdle);
+      r.setAttribute('stroke', isA?l.strokeActive:l.strokeIdle);
+      r.setAttribute('stroke-width', isA?'2.5':'1');
+      r.style.opacity=isA?'1':'0.55';
+      r.setAttribute('filter', isA?'url(#lo-glow2)':'none');
+      arcEls[l.id].style.fill=isA?l.arcColor:l.arcColorIdle;
+    });
+    pulseRing.setAttribute('r',String(L.ringR));
+    tabsEl.querySelectorAll('.layer-tab').forEach(t=>t.classList.toggle('active',t.dataset.layer===id));
+    detailEl.innerHTML=`
+      <div class="layer-detail">
+        <div class="layer-detail-meta">${esc(L.meta)}</div>
+        <div class="layer-detail-name">${esc(L.name)}</div>
+        <p class="layer-detail-desc">${esc(L.desc)}</p>
+        <div class="layer-detail-example">${esc(L.example)}</div>
+      </div>`;
+  }
+
+  setLayer('l3');
+})();
+
+// ── default pipeline to Query tab ────────────────────────────
+(function(){
+  const queryStep = pipelineNav.querySelector('[data-mode="query"]');
+  queryStep.classList.add('active');
+  pipelinePanel.classList.add('open');
+  activeMode = 'query';
+  renderPanel('query');
+})();
 </script>
 </body>
 </html>
