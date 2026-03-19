@@ -30,7 +30,13 @@
       --code-bg:     #eae4d6;
       --pass:        #3a6030;
       --fail:        #a03020;
-    }
+    --eco-bg:       #f6f1e9;
+    --eco-border:   rgba(26,20,16,0.10);
+    --eco-text:     #9a8870;
+    --eco-text-hi:  #1a1410;
+    --eco-accent:   #8a6a10;
+    --eco-mono:     'DM Mono', monospace;
+  }
 
     html { scroll-behavior: smooth; }
 
@@ -425,6 +431,150 @@
   </style>
 </head>
 <body>
+<!--
+  AXM Ecosystem Nav — shared across all pages
+  
+  USAGE: Paste this block at the top of <body> in each page.
+  Set data-active to the current page's key.
+  
+  The nav reads CSS custom properties from the host page:
+    --eco-bg       (fallback: #0e0e0f)
+    --eco-border   (fallback: #2a2a2e)  
+    --eco-text     (fallback: #666)
+    --eco-text-hi  (fallback: #e0e0e0)
+    --eco-accent   (fallback: #c8a84b)
+    --eco-mono     (fallback: 'DM Mono', monospace)
+  
+  Each page sets these in its :root {} to match its palette.
+-->
+<style>
+.eco-nav {
+  position: relative;
+  z-index: 900;
+  background: var(--eco-bg, #0e0e0f);
+  border-bottom: 1px solid var(--eco-border, #2a2a2e);
+  font-family: var(--eco-mono, 'DM Mono', monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  user-select: none;
+}
+.eco-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  gap: 6px;
+}
+.eco-nav-brand {
+  color: var(--eco-text, #666);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+.eco-nav-brand strong {
+  color: var(--eco-text-hi, #e0e0e0);
+  font-weight: 500;
+}
+.eco-nav-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--eco-border, #2a2a2e);
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+.eco-nav a {
+  color: var(--eco-text, #666);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 3px;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+  position: relative;
+}
+.eco-nav a:hover {
+  color: var(--eco-text-hi, #e0e0e0);
+  background: rgba(255,255,255,0.03);
+}
+.eco-nav a.eco-active {
+  color: var(--eco-accent, #c8a84b);
+}
+.eco-nav a.eco-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background: var(--eco-accent, #c8a84b);
+  opacity: 0.6;
+}
+.eco-nav-kind {
+  font-size: 8px;
+  opacity: 0.5;
+  display: inline-block;
+  margin-left: 2px;
+  vertical-align: top;
+}
+.eco-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.eco-nav-github {
+  opacity: 0.4;
+  transition: opacity 0.15s;
+}
+.eco-nav-github:hover {
+  opacity: 0.8;
+}
+@media (max-width: 768px) {
+  .eco-nav-inner { 
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .eco-nav-inner::-webkit-scrollbar { display: none; }
+  .eco-nav a { padding: 6px 7px; font-size: 9px; }
+  .eco-nav-brand { display: none; }
+}
+</style>
+
+<div class="eco-nav" data-active="chat">
+  <div class="eco-nav-inner">
+    <div class="eco-nav-brand"><strong>AXM</strong> &nbsp;Protocol</div>
+    <div class="eco-nav-sep"></div>
+    <a href="https://bigbirdreturns.github.io/axm-genesis/" data-page="genesis">Genesis<span class="eco-nav-kind"> kernel</span></a>
+    <a href="https://bigbirdreturns.github.io/axm-core/" data-page="core">Core<span class="eco-nav-kind"> hub</span></a>
+    <div class="eco-nav-sep"></div>
+    <a href="https://bigbirdreturns.github.io/axm-chat/" data-page="chat">Chat<span class="eco-nav-kind"> spoke</span></a>
+    <a href="https://bigbirdreturns.github.io/axm-show/" data-page="show">Show<span class="eco-nav-kind"> spoke</span></a>
+    <a href="https://bigbirdreturns.github.io/axm-embodied/" data-page="embodied">Embodied<span class="eco-nav-kind"> spoke</span></a>
+    <div class="eco-nav-right">
+      <a href="https://github.com/BigBirdReturns" class="eco-nav-github" target="_blank" title="GitHub">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-highlight active page based on data-active attribute
+(function() {
+  const nav = document.querySelector('.eco-nav');
+  if (!nav) return;
+  const active = nav.dataset.active;
+  if (active) {
+    const link = nav.querySelector(`[data-page="${active}"]`);
+    if (link) link.classList.add('eco-active');
+  }
+})();
+</script>
+
 <div class="page">
 
   <header>
@@ -504,40 +654,12 @@
   <!-- 03 -->
   <section class="rule-section">
     <div class="section-label"><span class="n">03</span> Shard Anatomy</div>
-    <div class="shard-grid">
-      <div class="problem-text">
-        <h2>No black boxes. Just files.</h2>
-        <p>A "shard" is not a proprietary database. It is a standard directory. You can zip it, email it, or query it with any data science tool. The security is in the cryptography, not the storage medium.</p>
-        <p>Click <code>manifest.json</code> to inspect the structure. This is the exact artifact <code>axm-chat</code> produces. <code>axm-core</code> mounts these directories directly into DuckDB at query time.</p>
-      </div>
-      <div class="code-block">
-<pre><span class="c-comment"># A compiled AXM conversation shard</span>
-<span class="c-path">~/.axm/shards/chat_My_Conversation_abc123/</span>
-
-<span class="c-cmd" onclick="toggleManifest()">manifest.json</span>             <span class="c-comment"># metadata + Merkle root</span>
-content/source.txt         <span class="c-comment"># full transcript</span>
-graph/claims.parquet       <span class="c-comment"># structured claims</span>
-sig/manifest.sig           <span class="c-comment"># ML-DSA-44 signature</span>
-ext/episodes&#64;1.parquet     <span class="c-comment"># topics · people · tools · state</span>
-ext/engineering&#64;1.parquet  <span class="c-comment"># problem · graveyard · solution · rule</span>
-ext/lineage&#64;1.parquet      <span class="c-comment"># supersession chain</span></pre>
-<pre id="manifest-example">{
-  "spec_version": "1.0.0",
-  "shard_id": "chat_My_Conversation_abc123",
-  "shard_type": "conversation",
-  "sources": [
-    { "path": "content/source.txt", "sha256": "e3b0c44…" }
-  ],
-  "statistics": { "claims": 34 },
-  "publisher": { "name": "user", "id": "mldsa44:abc123…" },
-  "merkle_root": "blake3:9f86d08…"
-}</pre>
-      </div>
+    <div class="problem-text" style="max-width:680px; margin-bottom:40px;">
+      <h2>Every shard is verifiable.</h2>
+      <p>Each compiled shard contains the source document, structured claims, byte-level provenance, and a cryptographic signature. Tamper any byte and verification fails.</p>
+      <p style="margin-top:16px;"><a href="https://bigbirdreturns.github.io/axm-genesis/#shard" style="color:var(--gold); text-decoration:none; border-bottom:1px solid var(--gold);">Full shard format specification on Genesis →</a></p>
     </div>
-  </section>
 
-  <!-- 04 -->
-  <section class="rule-section">
     <div class="section-label"><span class="n">04</span> The Primitives</div>
     <div class="specs-grid">
       <div class="spec-card">
@@ -683,6 +805,16 @@ const QUERIES = {
     ],
     sql:`SELECT object AS attempt, reasoning AS reason, shard_id AS shard\nFROM claims\nJOIN ext.engineering USING (claim_id)\nWHERE graveyard IS NOT NULL\n  AND subject LIKE '%merkle%'`,
     note:'Query reached into ext/engineering\u00401.parquet graveyard field · 3 failed attempts recovered',
+  },
+  'what changed since january': {
+    columns:['date','subject','predicate','object'],
+    rows: (() => {
+      const JAN = new Date('2025-01-01');
+      return DECISIONS.filter(d => new Date(d.decided_at) >= JAN)
+        .map(d => [d.decided_at, d.subject, d.predicate, d.object]);
+    })(),
+    sql:`SELECT decided_at, subject, predicate, object\nFROM claims\nJOIN shards USING (shard_id)\nWHERE decided_at >= '2025-01-01'\nORDER BY decided_at DESC`,
+    note:'Changes recorded since January 2025 · filtered by decided_at timestamp · verified ✓',
   },
   default: {
     columns:['subject','predicate','object'],

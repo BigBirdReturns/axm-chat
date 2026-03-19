@@ -23,7 +23,7 @@ from typing import Any, List, Optional
 # Direct imports — these are declared dependencies in pyproject.toml.
 # No path searching. No try/except. If these fail, the install is broken.
 from axm_build.compiler_generic import CompilerConfig, compile_generic_shard
-from axm_build.sign import SUITE_ED25519, mldsa44_keygen
+from axm_build.sign import SUITE_ED25519, SUITE_MLDSA44, mldsa44_keygen
 
 # ---------------------------------------------------------------------------
 # Config
@@ -31,7 +31,7 @@ from axm_build.sign import SUITE_ED25519, mldsa44_keygen
 
 DEFAULT_SHARD_DIR = Path.home() / ".axm" / "shards"
 DEFAULT_KEY_DIR = Path.home() / ".axm" / "keys"
-SUITE = SUITE_ED25519
+SUITE = SUITE_MLDSA44  # default to post-quantum; use --suite ed25519 for reproducible gold shards
 
 
 # ---------------------------------------------------------------------------
