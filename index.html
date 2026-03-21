@@ -19,7 +19,7 @@
       --ink:         #1a1410;
       --ink-mid:     #3a3020;
       --ink-dim:     #5a5040;
-      --ink-faint:   #9a8870;
+      --ink-faint:   #7a6a52;
       --paper:       #f6f1e9;
       --paper-warm:  #ede8dc;
       --paper-deep:  #e2dace;
@@ -32,7 +32,7 @@
       --fail:        #a03020;
     --eco-bg:       #f6f1e9;
     --eco-border:   rgba(26,20,16,0.10);
-    --eco-text:     #9a8870;
+    --eco-text:     #7a6a52;
     --eco-text-hi:  #1a1410;
     --eco-accent:   #8a6a10;
     --eco-mono:     'DM Mono', monospace;
@@ -44,7 +44,7 @@
       background: var(--paper);
       color: var(--ink);
       font-family: 'EB Garamond', Georgia, serif;
-      font-size: 18px;
+      font-size: clamp(16px, 1.7vw, 19px);
       line-height: 1.75;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
@@ -60,7 +60,7 @@
       z-index: 9000;
     }
 
-    .page { max-width: 1160px; margin: 0 auto; padding: 0 52px; }
+    .page { max-width: 1160px; margin: 0 auto; padding: 0 clamp(16px, 5vw, 52px); }
 
     /* ── HEADER ── */
     header { padding: 40px 0 0; border-bottom: 1px solid var(--rule); }
@@ -416,17 +416,20 @@
       .pipeline-nav { grid-template-columns: 1fr; border-radius: 6px 6px 0 0; }
       .pipeline-step { border-right: none; }
       .specs-grid { grid-template-columns: repeat(2, 1fr); }
-      .page { padding: 0 28px; }
     }
     @media (max-width: 540px) {
+      body { font-size: 16px; }
       .specs-grid { grid-template-columns: 1fr; }
-      .page { padding: 0 20px; }
-      h1 { font-size: 40px !important; }
-      .panel-body { padding: 28px 20px; }
+      h1 { font-size: clamp(32px, 8vw, 44px) !important; }
+      h2 { font-size: clamp(20px, 5vw, 28px); }
+      .panel-body { padding: 20px 16px; }
       footer { flex-direction: column; gap: 20px; text-align: center; }
       .footer-links { justify-content: center; }
-      .hero-thesis { padding: 0 20px; font-size: 20px; }
+      .hero-thesis { padding: 0; font-size: clamp(18px, 4vw, 22px); }
       .hero-thesis::before, .hero-thesis::after { display: none; }
+      nav a { font-size: 10px; letter-spacing: 0.06em; }
+      .install-block pre { font-size: 11px; }
+      .layer-onion-wrap { flex-direction: column; }
     }
   </style>
 </head>
